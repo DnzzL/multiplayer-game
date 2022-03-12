@@ -1,0 +1,30 @@
+[
+    {
+        "name": "Loup-Garou",
+        "description": "Vaincre les villageois est son objectif. Durant la nuit les loups-garous se réunissent pour voter qui va être éliminé. Pendant la journée il ne doit pas être démasqué."
+    }
+    , {
+        "name": "Villageois",
+        "description": "Son objectif est de vaincre les Loups-Garous. Sa parole est son seul pouvoir de persuasion pour éliminer les Loups-Garous. Il doit rester à l'affût d'indices, et identifier les coupables"
+    }
+    , {
+        "name": "Voyante",
+        "description": "Son objectif est de vaincre les Loups-Garous. Chaque nuit, elle peut connaître le rôle d'un joueur qu'elle aura choisi. Elle doit aider les innocents sans se faire démasquer."
+    }
+    , {
+        "name": "Sorcière",
+        "description": "Son objectif est de vaincre les Loups-Garous. Elle se réveille chaque nuit et peut utiliser une de ses deux potions : soigner la victime des Loups-Garous, ou tuer quelqu’un."
+    }
+    , {
+        "name": "Petite-Fille",
+        "description": "Son objectif est de vaincre les Loups-Garous. Elle se lève la nuit au moment du choix des Loups-Garous pour espionner leurs échanges."
+    },
+    {
+        "name": "Chasseur",
+        "description": "Son objectif est de vaincre les Loups-Garous. Lorsque le Chasseur meurt, il a le pouvoir d'amener un autre joueur avec lui dans sa tombe."
+    }
+    , {
+        "name": "Cupidon",
+        "description": "Son objectif est de vaincre les Loups-Garous. La première nuit, il désigne deux amoureux. Si l'un meurt, l'autre le suivra dans sa tombe."
+    }
+]
