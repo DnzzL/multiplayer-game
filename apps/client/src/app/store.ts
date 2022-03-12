@@ -1,30 +1,16 @@
 import create from 'zustand';
+import { Player } from './types';
 
 interface GameState {
+    user: Player;
     userName: string;
-    currentPlayer: string;
-    players: string[]
-    setUserName: (player: string) => void;
-    setCurrentPlayer: (player: string) => void;
-    setPlayers: (players: string[]) => void;
+    players: Player[]
 }
 
 const useStore = create<GameState>(set => ({
+    user: { id: "", userName: "" },
     userName: "",
-    currentPlayer: "",
     players: [],
-    setUserName: (userName: string) => set((state) => ({
-        ...state,
-        userName
-    })),
-    setCurrentPlayer: (currentPlayer: string) => set((state) => ({
-        ...state,
-        currentPlayer
-    })),
-    setPlayers: (players: string[]) => set((state) => ({
-        ...state,
-        players
-    }))
 }))
 
 export default useStore
