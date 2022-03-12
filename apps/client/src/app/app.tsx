@@ -1,7 +1,8 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { Routes, Route } from "react-router-dom";
-import Login from "./login/login";
-import Room from "./room/room";
+import { Route, Routes } from "react-router-dom";
+import Game from "./pages/game/game";
+import Login from "./pages/login/login";
+import Room from "./pages/room/room";
 
 
 export function App() {
@@ -10,6 +11,7 @@ export function App() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="room" element={<Room />} />
+        <Route path="game" element={<Game />} />
       </Routes>
     </div>
   )

@@ -2,8 +2,8 @@ import { useCallback, useState } from "react";
 import {
   useNavigate
 } from "react-router-dom";
-import socket from "../socket";
-import useStore from "../store";
+import socket from "../../socket";
+import useStore from "../../store";
 
 
 export function Login() {
