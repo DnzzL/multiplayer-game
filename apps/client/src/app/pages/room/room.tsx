@@ -1,7 +1,7 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import RoleForm from "../../components/roleform/roleform";
 import socket from "../../socket";
-import useStore, { useAddWerewolf, usePlayers, useWerewolfCount } from "../../store";
+import useStore, { usePlayers } from "../../store";
 import { Player } from "../../types";
 
 export function Room() {
@@ -31,35 +31,10 @@ export function Room() {
     </div>
   }
 
-  const AddWereWolfSection = () => {
-    const addWerewolf = useAddWerewolf()
-    return (
-      <div>
-        <button onClick={addWerewolf}>Add a werewolf</button>
-      </div>
-    )
-  }
-
-  const WereWolfCountSection = () => {
-    const werewolfCount = useWerewolfCount()
-    return <div>Werewolf count: {werewolfCount}</div>
-  }
-
-  const StartGameSection = () => {
-    const navigate = useNavigate();
-    return (
-      <div>
-        <button onClick={() => navigate("/game")}>Start Game</button>
-      </div>
-    )
-  }
-
   return (
     <div className="room">
       <PlayerList></PlayerList>
-      <AddWereWolfSection></AddWereWolfSection>
-      <WereWolfCountSection></WereWolfCountSection>
-      <StartGameSection></StartGameSection>
+      <RoleForm></RoleForm>
     </div>
   );
 }
