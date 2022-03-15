@@ -17,14 +17,14 @@ app.get('/', (req, res) => {
 
 io.on("connection", (socket) => {
   console.log("%s has connected", socket.data.userName)
-  const players = [];
+  const users = [];
   for (let [id, socket] of io.of("/").sockets) {
-    players.push({
+    users.push({
       userID: id,
       userName: socket.data.userName,
     });
   }
-  socket.emit("players", players);
+  socket.emit("users", users);
 });
 
 io.use((socket, next) => {
@@ -49,13 +49,3 @@ server.listen(3000, () => {
   console.log('listening on *:3000');
 });
 
-
-// app.get('/api', (req, res) => {
-//   res.send({ message: 'Welcome to api!' });
-// });
-
-// const port = process.env.port || 3333;
-// const server = app.listen(port, () => {
-//   console.log(`Listening at http://localhost:${port}/api`);
-// });
-// server.on('error', console.error);
