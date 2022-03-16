@@ -10,6 +10,8 @@ export function Login() {
   const navigate = useNavigate();
   const [userName, setUsername] = useState("")
 
+  socket.emit("lol", "debug")
+
   const onClick = useCallback(() => {
     if (userName !== "") {
       socket.auth = { userName: userName };

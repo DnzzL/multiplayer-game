@@ -1,6 +1,7 @@
+import { GameConfig, Player } from '@loup-garou/types';
+import { Server } from "socket.io";
 import express = require('express');
 import http = require('http');
-import { Server } from "socket.io";
 
 const app = express();
 const server = http.createServer(app);
@@ -43,6 +44,15 @@ io.on("connection", (socket) => {
     userName: socket.data.userName,
   });
 });
+
+
+io.on("players", (players: Player[]) => {
+  console.log(players)
+})
+
+io.on("gameconfig", (gameConfig: GameConfig) => {
+  console.log(gameConfig)
+})
 
 
 server.listen(3000, () => {

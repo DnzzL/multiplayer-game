@@ -1,11 +1,12 @@
+import { GameConfig, Player, User } from '@loup-garou/types';
 import create from 'zustand';
-import { Player, User } from './types';
+
 
 interface GameState {
     user: User;
     users: User[];
     turns: number;
-    gameConfig: any
+    gameConfig: GameConfig
     werewolfCount: number;
     villagerCount: number;
     players: Player[]
@@ -16,7 +17,7 @@ const useStore = create<GameState>(set => ({
     users: [],
     werewolfCount: 0,
     villagerCount: 0,
-    gameConfig: { werewolves: 0, villagers: 0 },
+    gameConfig: { werewolf: 0, villager: 0, sorcerer: 0, cupidon: 0 },
     turns: 0,
     players: []
 }))

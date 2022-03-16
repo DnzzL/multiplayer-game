@@ -1,13 +1,14 @@
+import { GameConfig, User } from "@loup-garou/types";
 import { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import socket from "../../socket";
-import useStore, { useGameConfig, useUsers } from "../../store";
-import { User } from "../../types";
+import useStore, { useGameConfig, useUser, useUsers } from "../../store";
 
 
 export function Room() {
   const users = useUsers();
+  console.log(useUser())
 
   useEffect(() => {
       socket.on("users", (users: User[]) => {
@@ -40,6 +41,7 @@ export function Room() {
     const gameConfig = useGameConfig()
     const onSubmit = (_: any) => {
         navigate("/game")
+        socket.emit("gameconfig", gameConfig)
     }
   
     const onChange = (data: any) => {
@@ -49,7 +51,7 @@ export function Room() {
     const rolesCount = useCallback(() => {
         return Object.values(gameConfig).map(Number).reduce((a,b) => a+b)
     }, [gameConfig])
-  
+
     return <div>
       <form onSubmit={handleSubmit(onSubmit)} onChange={handleSubmit(onChange)}>
       <label>Loup Garou</label>
