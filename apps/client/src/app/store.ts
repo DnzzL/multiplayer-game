@@ -1,8 +1,11 @@
 import { GameConfig, Player, User } from '@loup-garou/types';
+import { Socket } from 'socket.io-client';
+import { DefaultEventsMap } from 'socket.io/dist/typed-events';
 import create from 'zustand';
 
 
 interface GameState {
+    socket: Socket<DefaultEventsMap, DefaultEventsMap>
     user: User;
     users: User[];
     turns: number;
@@ -13,6 +16,7 @@ interface GameState {
 }
 
 const useStore = create<GameState>(set => ({
+    socket: null as any,
     user: { userID: "", userName: "" },
     users: [],
     werewolfCount: 0,
@@ -23,6 +27,7 @@ const useStore = create<GameState>(set => ({
 }))
 
 export default useStore
+export const useSocket = () => useStore((state) => state.socket)
 export const useUser = () => useStore((state) => state.user)
 export const useUsers = () => useStore((state) => state.users)
 export const useGameConfig = () => useStore((state) => state.gameConfig)

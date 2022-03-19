@@ -1,28 +1,26 @@
-import { GameConfig, User } from "@loup-garou/types";
+import { User } from "@loup-garou/types";
 import { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import socket from "../../socket";
-import useStore, { useGameConfig, useUser, useUsers } from "../../store";
+import useStore, { useGameConfig, useSocket, useUsers } from "../../store";
 
 
 export function Room() {
+  const socket = useSocket()
   const users = useUsers();
-  console.log(useUser())
 
   useEffect(() => {
-      socket.on("users", (users: User[]) => {
-        useStore.setState({
-          users
-        })
-      });
-  }, [])
+    const userListener = (user: User) => {
+      useStore.setState({users: [...users, user]})
+    };
+      socket.on('user', userListener);
+      socket.emit("getUsers", socket.id)
 
-  useEffect(() => {
-    socket.on("user connected", (user: User) => {
-      useStore.setState({ users: [...users, user] })
-    });
-  }, [users])
+      return () => {
+        socket.off('user', userListener);
+      };
+  }, [socket, users])
+
 
   const PlayerList = () => {
     return <div>

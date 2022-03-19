@@ -2,24 +2,21 @@ import { useCallback, useState } from "react";
 import {
   useNavigate
 } from "react-router-dom";
-import socket from "../../socket";
-import useStore from "../../store";
+import { useSocket } from "../../store";
 
 
 export function Login() {
   const navigate = useNavigate();
+  const socket = useSocket()
   const [userName, setUsername] = useState("")
-
-  socket.emit("lol", "debug")
 
   const onClick = useCallback(() => {
     if (userName !== "") {
       socket.auth = { userName: userName };
       socket.connect();
-      useStore.setState({ user: {userID: socket.id, userName: userName} })
       navigate("/room")
     }
-  }, [userName, navigate])
+  }, [socket, userName, navigate])
 
   return (
     <div className="app">
