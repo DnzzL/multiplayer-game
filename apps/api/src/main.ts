@@ -1,9 +1,11 @@
-import { GameConfig, Player } from '@loup-garou/types';
 import { Server } from "socket.io";
+import { game } from "./game";
 import express = require('express');
 import http = require('http');
+import cors = require('cors');
 
 const app = express();
+app.use(cors())
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
@@ -12,47 +14,49 @@ const io = new Server(server, {
   }
 });
 
-app.get('/', (req, res) => {
-  res.send('<h1>Hello world</h1>');
-});
+game(io)
 
-io.on("connection", (socket) => {
-  console.log("%s has connected", socket.data.userName)
-  const users = [];
-  for (let [id, socket] of io.of("/").sockets) {
-    users.push({
-      userID: id,
-      userName: socket.data.userName,
-    });
-  }
-  socket.emit("users", users);
-});
+// app.get('/', (req, res) => {
+//   res.send('<h1>Hello world</h1>');
+// });
 
-io.use((socket, next) => {
-  const userName = socket.handshake.auth.userName;
-  if (!userName) {
-    return next(new Error("invalid username"));
-  }
-  socket.data.userName = userName;
-  next();
-});
+// io.on("connection", (socket) => {
+//   console.log("%s has connected", socket.data.userName)
+//   const users = [];
+//   for (let [id, socket] of io.of("/").sockets) {
+//     users.push({
+//       userID: id,
+//       userName: socket.data.userName,
+//     });
+//   }
+//   socket.emit("users", users);
+// });
 
-io.on("connection", (socket) => {
-  // notify existing users
-  socket.broadcast.emit("user connected", {
-    userID: socket.id,
-    userName: socket.data.userName,
-  });
-});
+// io.use((socket, next) => {
+//   const userName = socket.handshake.auth.userName;
+//   if (!userName) {
+//     return next(new Error("invalid username"));
+//   }
+//   socket.data.userName = userName;
+//   next();
+// });
+
+// io.on("connection", (socket) => {
+//   // notify existing users
+//   socket.broadcast.emit("user connected", {
+//     userID: socket.id,
+//     userName: socket.data.userName,
+//   });
+// });
 
 
-io.on("players", (players: Player[]) => {
-  console.log(players)
-})
+// io.on("players", (players: Player[]) => {
+//   console.log(players)
+// })
 
-io.on("gameconfig", (gameConfig: GameConfig) => {
-  console.log(gameConfig)
-})
+// io.on("gameconfig", (gameConfig: GameConfig) => {
+//   console.log(gameConfig)
+// })
 
 
 server.listen(3000, () => {
