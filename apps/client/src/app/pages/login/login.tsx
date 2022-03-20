@@ -1,22 +1,24 @@
 import { useCallback, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import {
   useNavigate
 } from "react-router-dom";
-import { useSocket } from "../../store";
+import { gameActions } from "../../store/game.slice";
 
 
 export function Login() {
   const navigate = useNavigate();
-  const socket = useSocket()
+  const dispatch = useDispatch();
   const [userName, setUsername] = useState("")
 
   const onClick = useCallback(() => {
     if (userName !== "") {
-      socket.auth = { userName: userName };
-      socket.connect();
+      // socket.auth = { userName: userName };
+      // socket.connect();
+      dispatch(gameActions.sendUser({userName}))
       navigate("/room")
     }
-  }, [socket, userName, navigate])
+  }, [userName, dispatch, navigate])
 
   return (
     <div className="app">

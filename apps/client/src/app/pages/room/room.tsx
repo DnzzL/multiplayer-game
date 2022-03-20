@@ -1,25 +1,25 @@
-import { User } from "@loup-garou/types";
 import { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import useStore, { useGameConfig, useSocket, useUsers } from "../../store";
+import { gameActions, selectGameConfig, selectPlayers, selectUsers } from "../../store/game.slice";
 
 
 export function Room() {
-  const socket = useSocket()
-  const users = useUsers();
+  const users = useSelector(selectUsers)
+  const dispatch = useDispatch()
 
   useEffect(() => {
-    const usersListener = (users: User[]) => {
-      useStore.setState({users})
-    };
-      socket.on('users', usersListener);
-      socket.emit("getUsers", socket.id)
+    // const usersListener = (users: User[]) => {
+    //   dispatch(gameActions.setUsers(users))
+    // };
+    //   socket.on('users', usersListener);
+    //   socket.emit("getUsers", socket.id)
 
-      return () => {
-        socket.off('users', usersListener);
-      };
-  }, [socket, users])
+    //   return () => {
+    //     socket.off('users', usersListener);
+    //   };
+  }, [users, dispatch])
 
 
   const PlayerList = () => {
@@ -34,17 +34,16 @@ export function Room() {
 
   const RoleForm = () => {
     const navigate = useNavigate();
+    const dispatch = useDispatch()
     const { register, handleSubmit } = useForm();
-    const players = useUsers();
-    const gameConfig = useGameConfig()
+    const players = useSelector(selectPlayers)
+    const gameConfig =useSelector(selectGameConfig)
     const onSubmit = (_: any) => {
         navigate("/game")
-        socket.emit("gameconfig", gameConfig)
+        // socket.emit("gameconfig", gameConfig)
     }
   
-    const onChange = (data: any) => {
-      useStore.setState({ gameConfig: data})
-    }
+    const onChange = (data: any) => dispatch(gameActions.setGameConfig(data))
   
     const rolesCount = useCallback(() => {
         return Object.values(gameConfig).map(Number).reduce((a,b) => a+b)

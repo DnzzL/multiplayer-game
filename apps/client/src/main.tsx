@@ -1,14 +1,31 @@
 import { StrictMode } from 'react';
 import * as ReactDOM from 'react-dom';
-import { BrowserRouter } from "react-router-dom";
+import { BrowserRouter } from 'react-router-dom';
 import App from './app/app';
 
+import { configureStore } from '@reduxjs/toolkit';
+import { Provider } from 'react-redux';
+
+import { GAME_FEATURE_KEY, gameReducer } from './app/store/game.slice';
+
+const store = configureStore({
+  reducer: {
+    [GAME_FEATURE_KEY]: gameReducer,
+  },
+  // Additional middleware can be passed to this array
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware(),
+  devTools: process.env['NODE_ENV'] !== 'production',
+  // Optional Redux store enhancers
+  enhancers: [],
+});
 
 ReactDOM.render(
-  <StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
-  </StrictMode>,
+  <Provider store={store}>
+    <StrictMode>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </StrictMode>
+  </Provider>,
   document.getElementById('root')
 );

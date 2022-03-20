@@ -1,4 +1,4 @@
-import { GameConfig, Player, Role, User } from "@loup-garou/types";
+import { GameConfig, GameEvent, Player, Role, User } from "@loup-garou/types";
 import { Server } from "socket.io";
 import express = require('express');
 import http = require('http');
@@ -21,8 +21,7 @@ function addUser(user: User) {
   users.push(user)
 }
 
-function userJoined(socket) {
-  const userName = socket.handshake.auth.userName
+function userJoined(socket, userName) {
   console.log("%s has connected", userName)
   const user = {
     userID: socket.id,
@@ -32,8 +31,8 @@ function userJoined(socket) {
   addUser(user)
 }
 
-function handleGameConfig(value) {
-  const gameConfig = value as GameConfig
+function handleGameConfig(config) {
+  const gameConfig = config as GameConfig
   const shuffled = Object.keys(gameConfig)
     .filter((k) => Object(gameConfig)[k] > 0)
     .map((value: any) => ({ value, sort: Math.random() }))
@@ -46,9 +45,9 @@ function handleGameConfig(value) {
 }
 
 io.on('connection', (socket) => {
-  userJoined(socket)
-  socket.on('getUsers', () => {
-    io.sockets.emit('users', users)
+  socket.on(GameEvent.SendUser, (userName: string) => userJoined(socket, userName));
+  socket.on(GameEvent.RequestAllUsers, () => {
+    io.sockets.emit(GameEvent.SendAllUsers, users)
   });
   socket.on('gameConfig', (config) => handleGameConfig(config));
 });
