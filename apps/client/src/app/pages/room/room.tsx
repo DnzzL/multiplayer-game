@@ -10,14 +10,14 @@ export function Room() {
   const users = useUsers();
 
   useEffect(() => {
-    const userListener = (user: User) => {
-      useStore.setState({users: [...users, user]})
+    const usersListener = (users: User[]) => {
+      useStore.setState({users})
     };
-      socket.on('user', userListener);
+      socket.on('users', usersListener);
       socket.emit("getUsers", socket.id)
 
       return () => {
-        socket.off('user', userListener);
+        socket.off('users', usersListener);
       };
   }, [socket, users])
 

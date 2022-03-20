@@ -5,9 +5,7 @@ export interface User {
 
 export type Role = "werewolf" | "villager" | "sorcerer" | "cupidon"
 
-export interface Player {
-  userID: string
-  userName: string
+export interface Player extends User {
   role: Role
   alive: boolean
 }
