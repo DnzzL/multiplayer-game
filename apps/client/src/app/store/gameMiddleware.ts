@@ -1,7 +1,18 @@
-import { GameEvent, User } from '@loup-garou/types';
+
 import { Action, Middleware } from 'redux';
 import { io, Socket } from 'socket.io-client';
 import { gameActions } from './game.slice';
+interface User {
+    userID: string
+    userName: string
+
+}
+enum GameEvent {
+    SendUser = 'send_user',
+    RequestAllUsers = 'request_all_users',
+    SendAllUsers = 'send_all_users',
+    ReceiveUser = 'receive_player'
+}
 
 
 const chatMiddleware: Middleware = store => next => action => {
@@ -11,9 +22,7 @@ const chatMiddleware: Middleware = store => next => action => {
         const isConnectionEstablished = socket && store.getState().chat.isConnected;
 
         if (gameActions.startConnecting.match(action)) {
-            socket = io("http://localhost:3000", {
-                withCredentials: true,
-            });
+            socket = io("http://localhost:3000", { transports: ["websocket"], autoConnect: false });
 
             socket.on('connect', () => {
                 store.dispatch(gameActions.connectionEstablished());
