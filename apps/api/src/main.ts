@@ -61,10 +61,7 @@ io.on('connection', (socket) => {
   socket.on(GameEvent.RequestAllUsers, () => {
     io.sockets.emit(GameEvent.SendAllUsers, users)
   });
-  socket.on(GameEvent.RequestGameConfig, () => {
-    socket.emit(GameEvent.SendGameConfig, gameConfig)
-  });
-  socket.on(GameEvent.SetGameConfig, (config) => handleGameConfig(io, config));
+  socket.on(GameEvent.SendGameConfig, (config: GameConfig) => handleGameConfig(io, config));
 });
 
 server.listen(3000, () => {

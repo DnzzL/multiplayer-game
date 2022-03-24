@@ -24,7 +24,7 @@ const gameMiddleware: Middleware = store => {
             })
 
             socket.on(GameEvent.SendGameConfig, (gameConfig: GameConfig) => {
-                store.dispatch(gameActions.sendGameConfig({ gameConfig }));
+                socket.emit(GameEvent.SendGameConfig, { gameConfig });
             })
 
         }
@@ -36,9 +36,6 @@ const gameMiddleware: Middleware = store => {
             }
             if (gameActions.getAllUsers.match(action)) {
                 socket.emit(GameEvent.RequestAllUsers);
-            }
-            if (gameActions.sendGameConfig.match(action)) {
-                socket.emit(GameEvent.SetGameConfig, action.payload.gameConfig)
             }
         }
 
