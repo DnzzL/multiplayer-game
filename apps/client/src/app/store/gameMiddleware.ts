@@ -1,5 +1,5 @@
 
-import { GameEvent, User } from '@loup-garou/types';
+import { GameConfig, GameEvent, User } from '@loup-garou/types';
 import { Middleware } from 'redux';
 import { io, Socket } from 'socket.io-client';
 import { gameActions } from './game.slice';
@@ -23,17 +23,22 @@ const gameMiddleware: Middleware = store => {
                 store.dispatch(gameActions.receiveAllUsers({ users }));
             })
 
+            socket.on(GameEvent.SendGameConfig, (gameConfig: GameConfig) => {
+                store.dispatch(gameActions.sendGameConfig({ gameConfig }));
+            })
+
         }
 
         if (isConnectionEstablished) {
             if (gameActions.sendUser.match(action)) {
                 socket.emit(GameEvent.SendUser, action.payload.userName);
+                store.dispatch(gameActions.setSelfId({ selfId: socket.id }))
             }
             if (gameActions.getAllUsers.match(action)) {
                 socket.emit(GameEvent.RequestAllUsers);
             }
-            if (gameActions.setGameConfig.match(action)) {
-                socket.emit(GameEvent.SendGameConfig, action.payload.gameConfig)
+            if (gameActions.sendGameConfig.match(action)) {
+                socket.emit(GameEvent.SetGameConfig, action.payload.gameConfig)
             }
         }
 

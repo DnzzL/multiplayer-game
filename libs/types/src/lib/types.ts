@@ -20,7 +20,9 @@ export interface GameConfig {
 
 export enum GameEvent {
   SendUser = 'send_user',
+  UserJoined = 'user_joined',
   RequestAllUsers = 'request_all_users',
   SendAllUsers = 'send_all_users',
-  SendGameConfig = 'send_game_config'
+  SendGameConfig = 'send_game_config',
+  SetGameConfig = 'set_game_config',
 }

@@ -18,6 +18,7 @@ export interface GameEntity {
 }
 
 export interface GameState extends EntityState<GameEntity> {
+  selfId: string,
   isEstablishingConnection: boolean;
   isConnected: boolean;
   users: User[],
@@ -29,6 +30,7 @@ export const gameAdapter = createEntityAdapter<GameEntity>();
 
 
 export const initialGameState: GameState = gameAdapter.getInitialState({
+  selfId: "",
   isEstablishingConnection: false,
   isConnected: false,
   users: [],
@@ -48,6 +50,9 @@ export const gameSlice = createSlice({
       state.isConnected = true;
       state.isEstablishingConnection = true;
     }),
+    setSelfId: (state, action) => {
+      state.selfId = action.payload.selfId;
+    },
     sendUser: ((state, action: PayloadAction<{
       userName: string
     }>) => {
@@ -59,11 +64,15 @@ export const gameSlice = createSlice({
     }>) => {
       state.users = action.payload.users;
     }),
-    sendGameConfig: (state, action: PayloadAction<{
+    sendGameConfig: ((state, action: PayloadAction<{
       gameConfig: GameConfig
-    }>) => { return },
-    setGameConfig: (state, action) => {
-      state.gameConfig = action.payload
+    }>) => {
+      return;
+    }),
+    setGameConfig: (state, action: PayloadAction<{
+      gameConfig: GameConfig
+    }>) => {
+      state.gameConfig = action.payload.gameConfig
     },
     setPlayers: (state, action) => {
       state.players = [...Object(action.payload)]
@@ -115,8 +124,7 @@ const { selectAll, selectEntities } = gameAdapter.getSelectors();
 export const getGameState = (rootState: any): GameState =>
   rootState[GAME_FEATURE_KEY];
 
-export const selectAllGame = createSelector(getGameState, selectAll);
-export const selectGameEntities = createSelector(getGameState, selectEntities);
+export const selectSelfId = createSelector(getGameState, (state) => state.selfId);
 export const selectUsers = createSelector(getGameState, (state) => state.users);
 export const selectPlayers = createSelector(getGameState, (state) => state.players);
 export const selectGameConfig = createSelector(getGameState, (state) => state.gameConfig);

@@ -1,5 +1,6 @@
 import { GameConfig, GameEvent, Player, Role, User } from "@loup-garou/types";
 import { Server } from "socket.io";
+import { DefaultEventsMap } from "socket.io/dist/typed-events";
 import express = require('express');
 import http = require('http');
 import cors = require('cors');
@@ -17,6 +18,8 @@ const io = new Server(server, {
 // game(io) -> is giving weird behaviors
 const users = new Array<User>();
 const players = new Array<Player>();
+let gameConfig: GameConfig
+
 function addUser(user: User) {
   users.push(user)
 }
@@ -27,21 +30,30 @@ function userJoined(socket, userName) {
     userID: socket.id,
     userName
   }
-  socket.broadcast.emit("user connected", user);
+  socket.broadcast.emit(GameEvent.UserJoined, user);
   addUser(user)
 }
 
-function handleGameConfig(config) {
-  const gameConfig = config as GameConfig
+function handleGameConfig(io: Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>, config: GameConfig) {
+  if (!config) {
+    return
+  }
+  gameConfig = config
+  io.sockets.emit(GameEvent.SetGameConfig, gameConfig)
+}
+
+function assignRoles(shuffled) {
+  users.forEach((user, idx) => {
+    players.push({ ...user, role: shuffled[idx] as Role, alive: true })
+  })
+}
+
+function handleGameStart() {
   const shuffled = Object.keys(gameConfig)
     .filter((k) => Object(gameConfig)[k] > 0)
     .map((value: any) => ({ value, sort: Math.random() }))
     .sort((a: { sort: number; }, b: { sort: number; }) => a.sort - b.sort)
     .map(({ value }) => value)
-  users.forEach((user, idx) => {
-    players.push({ ...user, role: shuffled[idx] as Role, alive: true })
-  })
-  console.log(players)
 }
 
 io.on('connection', (socket) => {
@@ -49,7 +61,10 @@ io.on('connection', (socket) => {
   socket.on(GameEvent.RequestAllUsers, () => {
     io.sockets.emit(GameEvent.SendAllUsers, users)
   });
-  socket.on('gameConfig', (config) => handleGameConfig(config));
+  socket.on(GameEvent.RequestGameConfig, () => {
+    socket.emit(GameEvent.SendGameConfig, gameConfig)
+  });
+  socket.on(GameEvent.SetGameConfig, (config) => handleGameConfig(io, config));
 });
 
 server.listen(3000, () => {
