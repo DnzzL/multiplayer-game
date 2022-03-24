@@ -13,8 +13,6 @@ export function Login() {
 
   const onClick = useCallback(() => {
     if (userName !== "") {
-      // socket.auth = { userName: userName };
-      // socket.connect();
       dispatch(gameActions.sendUser({userName}))
       navigate("/room")
     }

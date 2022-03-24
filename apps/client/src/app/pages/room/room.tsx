@@ -2,7 +2,7 @@ import { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { gameActions, selectGameConfig, selectPlayers, selectUsers } from "../../store/game.slice";
+import { gameActions, selectGameConfig, selectUsers } from "../../store/game.slice";
 
 
 export function Room() {
@@ -10,16 +10,8 @@ export function Room() {
   const dispatch = useDispatch()
 
   useEffect(() => {
-    // const usersListener = (users: User[]) => {
-    //   dispatch(gameActions.setUsers(users))
-    // };
-    //   socket.on('users', usersListener);
-    //   socket.emit("getUsers", socket.id)
-
-    //   return () => {
-    //     socket.off('users', usersListener);
-    //   };
-  }, [users, dispatch])
+      dispatch(gameActions.getAllUsers())
+  }, [dispatch])
 
 
   const PlayerList = () => {
@@ -36,11 +28,11 @@ export function Room() {
     const navigate = useNavigate();
     const dispatch = useDispatch()
     const { register, handleSubmit } = useForm();
-    const players = useSelector(selectPlayers)
+    const users = useSelector(selectUsers)
     const gameConfig =useSelector(selectGameConfig)
     const onSubmit = (_: any) => {
+        dispatch(gameActions.sendGameConfig({gameConfig}))
         navigate("/game")
-        // socket.emit("gameconfig", gameConfig)
     }
   
     const onChange = (data: any) => dispatch(gameActions.setGameConfig(data))
@@ -59,8 +51,8 @@ export function Room() {
       <input defaultValue={0} type="number" min="0" {...register("sorcerer", {min:0})} />
       <label>Cupidon</label>
       <input defaultValue={0} type="number" min="0" {...register("cupidon", {min:0})} />
-      <div>{rolesCount() !== players.length && <p>wrong nomber of roles chosen</p>}</div>
-      <input type="submit" disabled={rolesCount() !== players.length}/>
+      <div>{rolesCount() !== users.length && <p>wrong nomber of roles chosen</p>}</div>
+      <input type="submit" disabled={rolesCount() !== users.length}/>
     </form>
     </div>
   }

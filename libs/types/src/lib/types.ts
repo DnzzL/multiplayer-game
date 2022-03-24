@@ -22,5 +22,5 @@ export enum GameEvent {
   SendUser = 'send_user',
   RequestAllUsers = 'request_all_users',
   SendAllUsers = 'send_all_users',
-  ReceiveUser = 'receive_player'
+  SendGameConfig = 'send_game_config'
 }

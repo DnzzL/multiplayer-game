@@ -48,30 +48,26 @@ export const gameSlice = createSlice({
       state.isConnected = true;
       state.isEstablishingConnection = true;
     }),
+    sendUser: ((state, action: PayloadAction<{
+      userName: string
+    }>) => {
+      return;
+    }),
+    getAllUsers: () => { return },
     receiveAllUsers: ((state, action: PayloadAction<{
       users: User[]
     }>) => {
       state.users = action.payload.users;
     }),
-    receiveUser: ((state, action: PayloadAction<{
-      user: User
-    }>) => {
-      state.users.push(action.payload.user);
-    }),
-    setUsers: (state, action) => {
-      state.users = [...state.users, action.payload]
+    sendGameConfig: (state, action: PayloadAction<{
+      gameConfig: GameConfig
+    }>) => { return },
+    setGameConfig: (state, action) => {
+      state.gameConfig = action.payload
     },
     setPlayers: (state, action) => {
       state.players = [...Object(action.payload)]
     },
-    setGameConfig: (state, action) => {
-      state.gameConfig = action.payload
-    },
-    sendUser: ((state, action: PayloadAction<{
-      userName: string
-    }>) => {
-      return;
-    })
   },
 });
 

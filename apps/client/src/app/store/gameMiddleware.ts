@@ -15,23 +15,26 @@ const gameMiddleware: Middleware = store => {
             socket = io("http://localhost:3000", { transports: ["websocket"] });
 
             socket.on('connect', () => {
-                console.log("connected")
                 store.dispatch(gameActions.connectionEstablished());
                 socket.emit(GameEvent.RequestAllUsers);
             })
 
             socket.on(GameEvent.SendAllUsers, (users: User[]) => {
-                console.log("user joined")
                 store.dispatch(gameActions.receiveAllUsers({ users }));
             })
 
-            socket.on(GameEvent.ReceiveUser, (user: User) => {
-                store.dispatch(gameActions.receiveUser({ user }));
-            })
         }
 
-        if (gameActions.sendUser.match(action) && isConnectionEstablished) {
-            socket.emit(GameEvent.SendUser, action.payload.userName);
+        if (isConnectionEstablished) {
+            if (gameActions.sendUser.match(action)) {
+                socket.emit(GameEvent.SendUser, action.payload.userName);
+            }
+            if (gameActions.getAllUsers.match(action)) {
+                socket.emit(GameEvent.RequestAllUsers);
+            }
+            if (gameActions.setGameConfig.match(action)) {
+                socket.emit(GameEvent.SendGameConfig, action.payload.gameConfig)
+            }
         }
 
         next(action);
