@@ -1,18 +1,8 @@
 
+import { GameEvent, User } from '@loup-garou/types';
 import { Middleware } from 'redux';
 import { io, Socket } from 'socket.io-client';
 import { gameActions } from './game.slice';
-interface User {
-    userID: string
-    userName: string
-
-}
-enum GameEvent {
-    SendUser = 'send_user',
-    RequestAllUsers = 'request_all_users',
-    SendAllUsers = 'send_all_users',
-    ReceiveUser = 'receive_player'
-}
 
 
 const gameMiddleware: Middleware = store => {
