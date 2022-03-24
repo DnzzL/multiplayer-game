@@ -1,5 +1,5 @@
 
-import { Action, Middleware } from 'redux';
+import { Middleware } from 'redux';
 import { io, Socket } from 'socket.io-client';
 import { gameActions } from './game.slice';
 interface User {
@@ -15,21 +15,23 @@ enum GameEvent {
 }
 
 
-const chatMiddleware: Middleware = store => next => action => {
+const gameMiddleware: Middleware = store => {
     let socket: Socket;
 
-    return (next: (arg0: any) => void) => (action: Action) => {
-        const isConnectionEstablished = socket && store.getState().chat.isConnected;
+    return next => action => {
+        const isConnectionEstablished = socket && store.getState().game.isConnected;
 
         if (gameActions.startConnecting.match(action)) {
-            socket = io("http://localhost:3000", { transports: ["websocket"], autoConnect: false });
+            socket = io("http://localhost:3000", { transports: ["websocket"] });
 
             socket.on('connect', () => {
+                console.log("connected")
                 store.dispatch(gameActions.connectionEstablished());
                 socket.emit(GameEvent.RequestAllUsers);
             })
 
             socket.on(GameEvent.SendAllUsers, (users: User[]) => {
+                console.log("user joined")
                 store.dispatch(gameActions.receiveAllUsers({ users }));
             })
 
@@ -46,4 +48,4 @@ const chatMiddleware: Middleware = store => next => action => {
     }
 }
 
-export default chatMiddleware;
+export default gameMiddleware;
