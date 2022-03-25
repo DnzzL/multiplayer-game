@@ -31,6 +31,7 @@ export function Room() {
 
     const onSubmit = (_: any) => {
       dispatch(gameActions.sendGameConfig({ gameConfig }))
+      dispatch(gameActions.sendGameStart())
       navigate("/game")
     }
 

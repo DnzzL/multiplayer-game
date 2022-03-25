@@ -1,4 +1,4 @@
-import { GameConfig, Player, User } from '@loup-garou/types';
+import { GameConfig, Role, User } from '@loup-garou/types';
 import {
   createEntityAdapter,
   createSelector,
@@ -22,8 +22,8 @@ export interface GameState extends EntityState<GameEntity> {
   isEstablishingConnection: boolean;
   isConnected: boolean;
   users: User[],
-  players: Player[],
-  gameConfig: GameConfig
+  gameConfig: GameConfig,
+  selfRole: Role
 }
 
 export const gameAdapter = createEntityAdapter<GameEntity>();
@@ -34,8 +34,8 @@ export const initialGameState: GameState = gameAdapter.getInitialState({
   isEstablishingConnection: false,
   isConnected: false,
   users: [],
-  players: [],
-  gameConfig: { "werewolf": 0, "villager": 0, "cupidon": 0, "sorcerer": 0 }
+  gameConfig: { "werewolf": 0, "villager": 0, "cupidon": 0, "sorcerer": 0 },
+  selfRole: "villager"
 });
 
 
@@ -53,9 +53,7 @@ export const gameSlice = createSlice({
     setSelfId: (state, action) => {
       state.selfId = action.payload.selfId;
     },
-    sendUser: ((state, action: PayloadAction<{
-      userName: string
-    }>) => {
+    sendUser: ((state, action: PayloadAction<{ userName: string }>) => {
       return;
     }),
     getAllUsers: () => { return },
@@ -64,9 +62,7 @@ export const gameSlice = createSlice({
     }>) => {
       state.users = action.payload.users;
     }),
-    sendGameConfig: ((state, action: PayloadAction<{
-      gameConfig: GameConfig
-    }>) => {
+    sendGameConfig: ((state, action: PayloadAction<{ gameConfig: GameConfig }>) => {
       return;
     }),
     setGameConfig: (state, action: PayloadAction<{
@@ -74,9 +70,14 @@ export const gameSlice = createSlice({
     }>) => {
       state.gameConfig = action.payload.gameConfig
     },
-    setPlayers: (state, action) => {
-      state.players = [...Object(action.payload)]
-    },
+    sendGameStart: (() => {
+      return;
+    }),
+    receiveRole: ((state, action: PayloadAction<{
+      selfRole: Role
+    }>) => {
+      state.selfRole = action.payload.selfRole;
+    }),
   },
 });
 
@@ -126,5 +127,4 @@ export const getGameState = (rootState: any): GameState =>
 
 export const selectSelfId = createSelector(getGameState, (state) => state.selfId);
 export const selectUsers = createSelector(getGameState, (state) => state.users);
-export const selectPlayers = createSelector(getGameState, (state) => state.players);
 export const selectGameConfig = createSelector(getGameState, (state) => state.gameConfig);

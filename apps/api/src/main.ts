@@ -1,5 +1,5 @@
 import { GameConfig, GameEvent, Player, Role, User } from "@loup-garou/types";
-import { Server } from "socket.io";
+import { Server, Socket } from "socket.io";
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
 import express = require('express');
 import http = require('http');
@@ -30,16 +30,14 @@ function userJoined(socket, userName) {
     userID: socket.id,
     userName
   }
-  socket.broadcast.emit(GameEvent.UserJoined, user);
   addUser(user)
 }
 
-function handleGameConfig(io: Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>, config: GameConfig) {
+function handleGameConfig(config: GameConfig) {
   if (!config) {
     return
   }
   gameConfig = config
-  io.sockets.emit(GameEvent.SetGameConfig, gameConfig)
 }
 
 function assignRoles(shuffled) {
@@ -48,20 +46,28 @@ function assignRoles(shuffled) {
   })
 }
 
-function handleGameStart() {
+function handleGameStart(socket: Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>) {
+  if (!gameConfig) {
+    return
+  }
   const shuffled = Object.keys(gameConfig)
     .filter((k) => Object(gameConfig)[k] > 0)
     .map((value: any) => ({ value, sort: Math.random() }))
     .sort((a: { sort: number; }, b: { sort: number; }) => a.sort - b.sort)
     .map(({ value }) => value)
+  assignRoles(shuffled)
+  players.forEach((player) => {
+    socket.emit(GameEvent.ReceiveRole, player.role)
+  })
 }
 
 io.on('connection', (socket) => {
   socket.on(GameEvent.SendUser, (userName: string) => userJoined(socket, userName));
   socket.on(GameEvent.RequestAllUsers, () => {
-    io.sockets.emit(GameEvent.SendAllUsers, users)
+    io.sockets.emit(GameEvent.ReceiveAllUsers, users)
   });
-  socket.on(GameEvent.SendGameConfig, (config: GameConfig) => handleGameConfig(io, config));
+  socket.on(GameEvent.SendGameConfig, (config: GameConfig) => handleGameConfig(config));
+  socket.on(GameEvent.SendGameStart, () => handleGameStart(socket));
 });
 
 server.listen(3000, () => {

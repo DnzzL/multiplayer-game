@@ -1,5 +1,5 @@
 
-import { GameConfig, GameEvent, User } from '@loup-garou/types';
+import { GameEvent, Role, User } from '@loup-garou/types';
 import { Middleware } from 'redux';
 import { io, Socket } from 'socket.io-client';
 import { gameActions } from './game.slice';
@@ -19,23 +19,31 @@ const gameMiddleware: Middleware = store => {
                 socket.emit(GameEvent.RequestAllUsers);
             })
 
-            socket.on(GameEvent.SendAllUsers, (users: User[]) => {
+            socket.on(GameEvent.ReceiveAllUsers, (users: User[]) => {
                 store.dispatch(gameActions.receiveAllUsers({ users }));
             })
 
-            socket.on(GameEvent.SendGameConfig, (gameConfig: GameConfig) => {
-                socket.emit(GameEvent.SendGameConfig, { gameConfig });
+            socket.on(GameEvent.ReceiveRole, (selfRole: Role) => {
+                store.dispatch(gameActions.receiveRole({ selfRole }))
             })
 
         }
 
         if (isConnectionEstablished) {
             if (gameActions.sendUser.match(action)) {
-                socket.emit(GameEvent.SendUser, action.payload.userName);
                 store.dispatch(gameActions.setSelfId({ selfId: socket.id }))
+                socket.emit(GameEvent.SendUser, action.payload.userName)
             }
             if (gameActions.getAllUsers.match(action)) {
                 socket.emit(GameEvent.RequestAllUsers);
+            }
+
+            if (gameActions.sendGameConfig.match(action)) {
+                socket.emit(GameEvent.SendGameConfig, action.payload.gameConfig);
+            }
+
+            if (gameActions.sendGameStart.match(action)) {
+                socket.emit(GameEvent.SendGameStart);
             }
         }
 
