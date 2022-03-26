@@ -45,14 +45,23 @@ export const gameSlice = createSlice({
   initialState: initialGameState,
   reducers: {
     startConnecting: (state => {
-      state.isEstablishingConnection = true;
+      return {
+        ...state,
+        isEstablishingConnection: true
+      }
     }),
     connectionEstablished: (state => {
-      state.isConnected = true;
-      state.isEstablishingConnection = true;
+      return {
+        ...state,
+        isConnected: true,
+        isEstablishingConnection: true
+      }
     }),
     setSelfId: (state, action) => {
-      state.selfId = action.payload.selfId;
+      return {
+        ...state,
+        selfId: action.payload.selfId
+      }
     },
     sendUser: ((state, action: PayloadAction<{ userName: string }>) => {
       return;
@@ -61,7 +70,10 @@ export const gameSlice = createSlice({
     receiveAllUsers: ((state, action: PayloadAction<{
       users: User[]
     }>) => {
-      state.users = action.payload.users;
+      return {
+        ...state,
+        users: action.payload.users
+      }
     }),
     sendGameConfig: ((state, action: PayloadAction<{ gameConfig: GameConfig }>) => {
       return;
@@ -69,7 +81,10 @@ export const gameSlice = createSlice({
     setGameConfig: (state, action: PayloadAction<{
       gameConfig: GameConfig
     }>) => {
-      state.gameConfig = action.payload.gameConfig
+      return {
+        ...state,
+        gameConfig: action.payload.gameConfig
+      }
     },
     sendGameStart: (() => {
       return;
@@ -78,10 +93,16 @@ export const gameSlice = createSlice({
     receiveRole: ((state, action: PayloadAction<{
       selfRole: Role
     }>) => {
-      state.selfRole = action.payload.selfRole;
+      return {
+        ...state,
+        selfRole: action.payload.selfRole
+      }
     }),
     receiveGameStart: (state => {
-      state.isGameStarted = true
+      return {
+        ...state,
+        isGameStarted: true
+      }
     }),
   },
 });
