@@ -23,10 +23,13 @@ const gameMiddleware: Middleware = store => {
                 store.dispatch(gameActions.receiveAllUsers({ users }));
             })
 
+            socket.on(GameEvent.ReceiveGameStart, () => {
+                store.dispatch(gameActions.receiveGameStart())
+            })
+
             socket.on(GameEvent.ReceiveRole, (selfRole: Role) => {
                 store.dispatch(gameActions.receiveRole({ selfRole }))
             })
-
         }
 
         if (isConnectionEstablished) {
@@ -34,16 +37,17 @@ const gameMiddleware: Middleware = store => {
                 store.dispatch(gameActions.setSelfId({ selfId: socket.id }))
                 socket.emit(GameEvent.SendUser, action.payload.userName)
             }
-            if (gameActions.getAllUsers.match(action)) {
+            if (gameActions.requestAllUsers.match(action)) {
                 socket.emit(GameEvent.RequestAllUsers);
             }
-
             if (gameActions.sendGameConfig.match(action)) {
                 socket.emit(GameEvent.SendGameConfig, action.payload.gameConfig);
             }
-
             if (gameActions.sendGameStart.match(action)) {
                 socket.emit(GameEvent.SendGameStart);
+            }
+            if (gameActions.requestRole.match(action)) {
+                socket.emit(GameEvent.RequestRole);
             }
         }
 

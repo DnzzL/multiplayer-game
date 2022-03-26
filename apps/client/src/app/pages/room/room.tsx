@@ -3,27 +3,32 @@ import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import List from "../../list/list";
-import { gameActions, selectGameConfig, selectSelfId, selectUsers } from "../../store/game.slice";
+import { gameActions, selectGameConfig, selectIsGameStarted, selectSelfId, selectUsers } from "../../store/game.slice";
 
 
 export function Room() {
   const selfId = useSelector(selectSelfId)
   const users = useSelector(selectUsers)
+  const isGameStarted = useSelector(selectIsGameStarted)
   const dispatch = useDispatch()
+  const navigate = useNavigate();
 
   useEffect(() => {
-    dispatch(gameActions.getAllUsers())
+    dispatch(gameActions.requestAllUsers())
   }, [dispatch])
 
+  useEffect(() => {
+    if (isGameStarted) {
+      navigate("/game")
+    }
+  }, [isGameStarted, dispatch, navigate])
+
   const isRoomMaster = useCallback(() => {
-    console.log(selfId)
-    console.log(users)
     return users && users.length > 0 && selfId === users[0].userID
   }, [selfId, users])
 
 
   const RoleForm = () => {
-    const navigate = useNavigate();
     const dispatch = useDispatch()
     const { register, handleSubmit } = useForm();
     const users = useSelector(selectUsers)
@@ -32,7 +37,6 @@ export function Room() {
     const onSubmit = (_: any) => {
       dispatch(gameActions.sendGameConfig({ gameConfig }))
       dispatch(gameActions.sendGameStart())
-      navigate("/game")
     }
 
     const onChange = (gameConfig: any) => {

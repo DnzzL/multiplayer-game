@@ -20,17 +20,14 @@ const users = new Array<User>();
 const players = new Array<Player>();
 let gameConfig: GameConfig
 
-function addUser(user: User) {
-  users.push(user)
-}
 
-function userJoined(socket, userName) {
+function handleUser(socket, userName) {
   console.log("%s has connected", userName)
   const user = {
     userID: socket.id,
     userName
   }
-  addUser(user)
+  users.push(user)
 }
 
 function handleGameConfig(config: GameConfig) {
@@ -46,10 +43,14 @@ function assignRoles(shuffled) {
   })
 }
 
-function handleGameStart(socket: Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>) {
+function handleGameStart(io: Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>) {
   if (!gameConfig) {
     return
   }
+  io.sockets.emit(GameEvent.ReceiveGameStart)
+}
+
+function handleRole(socket: Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>) {
   const shuffled = Object.keys(gameConfig)
     .filter((k) => Object(gameConfig)[k] > 0)
     .map((value: any) => ({ value, sort: Math.random() }))
@@ -62,12 +63,13 @@ function handleGameStart(socket: Socket<DefaultEventsMap, DefaultEventsMap, Defa
 }
 
 io.on('connection', (socket) => {
-  socket.on(GameEvent.SendUser, (userName: string) => userJoined(socket, userName));
+  socket.on(GameEvent.SendUser, (userName: string) => handleUser(socket, userName));
   socket.on(GameEvent.RequestAllUsers, () => {
     io.sockets.emit(GameEvent.ReceiveAllUsers, users)
   });
   socket.on(GameEvent.SendGameConfig, (config: GameConfig) => handleGameConfig(config));
-  socket.on(GameEvent.SendGameStart, () => handleGameStart(socket));
+  socket.on(GameEvent.SendGameStart, () => handleGameStart(io));
+  socket.on(GameEvent.RequestRole, () => handleRole(socket));
 });
 
 server.listen(3000, () => {

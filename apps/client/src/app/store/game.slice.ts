@@ -14,7 +14,6 @@ export const GAME_FEATURE_KEY = 'game';
  */
 export interface GameEntity {
   id: number;
-
 }
 
 export interface GameState extends EntityState<GameEntity> {
@@ -23,7 +22,8 @@ export interface GameState extends EntityState<GameEntity> {
   isConnected: boolean;
   users: User[],
   gameConfig: GameConfig,
-  selfRole: Role
+  selfRole: Role,
+  isGameStarted: boolean
 }
 
 export const gameAdapter = createEntityAdapter<GameEntity>();
@@ -35,7 +35,8 @@ export const initialGameState: GameState = gameAdapter.getInitialState({
   isConnected: false,
   users: [],
   gameConfig: { "werewolf": 0, "villager": 0, "cupidon": 0, "sorcerer": 0 },
-  selfRole: "villager"
+  selfRole: "villager",
+  isGameStarted: false
 });
 
 
@@ -56,7 +57,7 @@ export const gameSlice = createSlice({
     sendUser: ((state, action: PayloadAction<{ userName: string }>) => {
       return;
     }),
-    getAllUsers: () => { return },
+    requestAllUsers: () => { return },
     receiveAllUsers: ((state, action: PayloadAction<{
       users: User[]
     }>) => {
@@ -73,10 +74,14 @@ export const gameSlice = createSlice({
     sendGameStart: (() => {
       return;
     }),
+    requestRole: () => { return },
     receiveRole: ((state, action: PayloadAction<{
       selfRole: Role
     }>) => {
       state.selfRole = action.payload.selfRole;
+    }),
+    receiveGameStart: (state => {
+      state.isGameStarted = true
     }),
   },
 });
@@ -128,3 +133,5 @@ export const getGameState = (rootState: any): GameState =>
 export const selectSelfId = createSelector(getGameState, (state) => state.selfId);
 export const selectUsers = createSelector(getGameState, (state) => state.users);
 export const selectGameConfig = createSelector(getGameState, (state) => state.gameConfig);
+export const selectIsGameStarted = createSelector(getGameState, (state) => state.isGameStarted);
+export const selectSelfRole = createSelector(getGameState, (state) => state.selfRole);

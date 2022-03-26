@@ -24,5 +24,7 @@ export enum GameEvent {
   ReceiveAllUsers = 'receive_all_users',
   SendGameConfig = 'send_game_config',
   SendGameStart = 'send_game_start',
-  ReceiveRole = 'receive_role'
+  RequestRole = 'request_role',
+  ReceiveRole = 'receive_role',
+  ReceiveGameStart = 'receive_game_start',
 }
