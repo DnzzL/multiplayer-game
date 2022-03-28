@@ -27,4 +27,12 @@ export enum GameEvent {
   RequestRole = 'request_role',
   ReceiveRole = 'receive_role',
   ReceiveGameStart = 'receive_game_start',
+  SendTurnStart = 'send_turn_start',
+  ReceiveTurnStart = 'receive_turn_start',
+  RequestRolePlaying = 'request_role_playing',
+  ReceiveRolePlaying = 'receive_role_playing'
 }
+
+
+export const firstRoleOrder: Role[] = ["cupidon", "werewolf", "sorcerer"]
+export const roleOrder: Role[] = ["werewolf", "sorcerer"]

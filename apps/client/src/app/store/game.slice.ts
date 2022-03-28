@@ -23,7 +23,10 @@ export interface GameState extends EntityState<GameEntity> {
   users: User[],
   gameConfig: GameConfig,
   selfRole: Role,
-  isGameStarted: boolean
+  isGameStarted: boolean,
+  isDuringTurn: boolean,
+  turnCount: number,
+  rolePlaying: Role
 }
 
 export const gameAdapter = createEntityAdapter<GameEntity>();
@@ -36,7 +39,10 @@ export const initialGameState: GameState = gameAdapter.getInitialState({
   users: [],
   gameConfig: { "werewolf": 0, "villager": 0, "cupidon": 0, "sorcerer": 0 },
   selfRole: "villager",
-  isGameStarted: false
+  isGameStarted: false,
+  isDuringTurn: false,
+  turnCount: 0,
+  rolePlaying: "cupidon"
 });
 
 
@@ -89,7 +95,9 @@ export const gameSlice = createSlice({
     sendGameStart: (() => {
       return;
     }),
-    requestRole: () => { return },
+    requestRole: ((state, action: PayloadAction<{ userID: string }>) => {
+      return;
+    }),
     receiveRole: ((state, action: PayloadAction<{
       selfRole: Role
     }>) => {
@@ -104,6 +112,30 @@ export const gameSlice = createSlice({
         isGameStarted: true
       }
     }),
+    switchIsDuringTurn: (state) => {
+      return {
+        ...state,
+        isDuringTurn: !state.isDuringTurn
+      }
+    },
+    sendTurnStart: (() => {
+      return;
+    }),
+    incrementTurnCount: (state) => {
+      return {
+        ...state,
+        turnCount: state.turnCount + 1
+      }
+    },
+    requestRolePlaying: (() => {
+      return;
+    }),
+    receiveRolePlaying: (state, action: PayloadAction<{ rolePlaying: Role }>) => {
+      return {
+        ...state,
+        rolePlaying: action.payload.rolePlaying
+      }
+    },
   },
 });
 
@@ -156,3 +188,6 @@ export const selectUsers = createSelector(getGameState, (state) => state.users);
 export const selectGameConfig = createSelector(getGameState, (state) => state.gameConfig);
 export const selectIsGameStarted = createSelector(getGameState, (state) => state.isGameStarted);
 export const selectSelfRole = createSelector(getGameState, (state) => state.selfRole);
+export const selectIsDuringTurn = createSelector(getGameState, (state) => state.isDuringTurn);
+export const selectTurnCount = createSelector(getGameState, (state) => state.turnCount);
+export const selectRolePlaying = createSelector(getGameState, (state) => state.rolePlaying);

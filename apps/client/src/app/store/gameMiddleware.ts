@@ -30,6 +30,10 @@ const gameMiddleware: Middleware = store => {
             socket.on(GameEvent.ReceiveRole, (selfRole: Role) => {
                 store.dispatch(gameActions.receiveRole({ selfRole }))
             })
+
+            socket.on(GameEvent.ReceiveRolePlaying, (rolePlaying: Role) => {
+                store.dispatch(gameActions.receiveRolePlaying({ rolePlaying }))
+            })
         }
 
         if (isConnectionEstablished) {
@@ -47,7 +51,13 @@ const gameMiddleware: Middleware = store => {
                 socket.emit(GameEvent.SendGameStart);
             }
             if (gameActions.requestRole.match(action)) {
-                socket.emit(GameEvent.RequestRole);
+                socket.emit(GameEvent.RequestRole, action.payload.userID);
+            }
+            if (gameActions.sendTurnStart.match(action)) {
+                socket.emit(GameEvent.SendTurnStart);
+            }
+            if (gameActions.requestRolePlaying.match(action)) {
+                socket.emit(GameEvent.RequestRolePlaying);
             }
         }
 

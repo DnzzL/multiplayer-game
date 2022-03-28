@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import {
   useNavigate
 } from "react-router-dom";
@@ -13,7 +13,7 @@ export function Login() {
 
   const onClick = useCallback(() => {
     if (userName !== "") {
-      dispatch(gameActions.sendUser({userName}))
+      dispatch(gameActions.sendUser({ userName }))
       navigate("/room")
     }
   }, [userName, dispatch, navigate])
@@ -23,6 +23,7 @@ export function Login() {
       <input type="text" name="name" value={userName} onChange={(event) => setUsername(event.target.value)} />
       <input type="submit" name="name" onClick={onClick} />
     </div>
+
   );
 }
 

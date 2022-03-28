@@ -1,4 +1,4 @@
-import { GameConfig, GameEvent, Player, Role, User } from "@loup-garou/types";
+import { firstRoleOrder, GameConfig, GameEvent, Player, Role, roleOrder, User } from "@loup-garou/types";
 import { Server, Socket } from "socket.io";
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
 import express = require('express');
@@ -19,7 +19,8 @@ const io = new Server(server, {
 const users = new Array<User>();
 const players = new Array<Player>();
 let gameConfig: GameConfig
-
+let turnCount = 0
+let currentTurnOrder = 0
 
 function handleUser(socket, userName) {
   console.log("%s has connected", userName)
@@ -35,6 +36,12 @@ function handleGameConfig(config: GameConfig) {
     return
   }
   gameConfig = config
+  const shuffled = Object.keys(gameConfig)
+    .filter((k) => Object(gameConfig)[k] > 0)
+    .map((value: string) => ({ value, sort: Math.random() }))
+    .sort((a: { sort: number; }, b: { sort: number; }) => a.sort - b.sort)
+    .map(({ value }) => value)
+  assignRoles(shuffled)
 }
 
 function assignRoles(shuffled) {
@@ -43,23 +50,30 @@ function assignRoles(shuffled) {
   })
 }
 
-function handleGameStart(io: Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>) {
+function handleGameStart(io: Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, unknown>) {
   if (!gameConfig) {
     return
   }
   io.sockets.emit(GameEvent.ReceiveGameStart)
 }
 
-function handleRole(socket: Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>) {
-  const shuffled = Object.keys(gameConfig)
+function handleRoleRequest(socket: Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, unknown>, userID: string) {
+  const role = players.find(player => player.userID === userID).role
+  socket.emit(GameEvent.ReceiveRole, role)
+}
+
+function handleTurnStart() {
+  currentTurnOrder = 0
+  turnCount++
+  console.log("starting turn", turnCount)
+}
+
+function handleSendRolePlaying(io: Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, unknown>) {
+  const assignedRoles = Object.keys(gameConfig)
     .filter((k) => Object(gameConfig)[k] > 0)
-    .map((value: any) => ({ value, sort: Math.random() }))
-    .sort((a: { sort: number; }, b: { sort: number; }) => a.sort - b.sort)
-    .map(({ value }) => value)
-  assignRoles(shuffled)
-  players.forEach((player) => {
-    socket.emit(GameEvent.ReceiveRole, player.role)
-  })
+  const rolePlaying = turnCount === 0 ? firstRoleOrder.filter(role => assignedRoles.includes(role))[currentTurnOrder] : roleOrder.filter(role => assignedRoles.includes(role))[currentTurnOrder]
+  io.sockets.emit(GameEvent.ReceiveRolePlaying, rolePlaying)
+  currentTurnOrder = currentTurnOrder <= assignRoles.length - 1 ? currentTurnOrder + 1 : 0
 }
 
 io.on('connection', (socket) => {
@@ -69,7 +83,9 @@ io.on('connection', (socket) => {
   });
   socket.on(GameEvent.SendGameConfig, (config: GameConfig) => handleGameConfig(config));
   socket.on(GameEvent.SendGameStart, () => handleGameStart(io));
-  socket.on(GameEvent.RequestRole, () => handleRole(socket));
+  socket.on(GameEvent.RequestRole, (userID: string) => handleRoleRequest(socket, userID));
+  socket.on(GameEvent.SendTurnStart, () => handleTurnStart());
+  socket.on(GameEvent.RequestRolePlaying, () => handleSendRolePlaying(io));
 });
 
 server.listen(3000, () => {
