@@ -1,13 +1,13 @@
 export interface User {
   userID: string
   userName: string
+  isAlive: boolean
 }
 
 export type Role = "werewolf" | "villager" | "sorcerer" | "cupidon"
 
 export interface Player extends User {
   role: Role
-  alive: boolean
 }
 
 
@@ -29,6 +29,8 @@ export enum GameEvent {
   ReceiveGameStart = 'receive_game_start',
   SendTurnStart = 'send_turn_start',
   ReceiveTurnStart = 'receive_turn_start',
+  RequestPartners = 'request_partners',
+  ReceivePartners = 'receive_partners',
   RequestRolePlaying = 'request_role_playing',
   ReceiveRolePlaying = 'receive_role_playing',
   ReceiveTurnEnd = 'receive_turn_end'
@@ -37,3 +39,8 @@ export enum GameEvent {
 
 export const firstRoleOrder: Role[] = ["cupidon", "werewolf", "sorcerer"]
 export const roleOrder: Role[] = ["werewolf", "sorcerer"]
+export const actions = {
+  "cupidon": ["bind"],
+  "werewolf": ["kill"],
+  "sorcerer": ["kill", "save", "pass"]
+}

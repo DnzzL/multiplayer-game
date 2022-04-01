@@ -1,14 +1,14 @@
 /* eslint-disable-next-line */
 export interface ListProps {
-  items: any[];
+  items: string[];
 }
 
 export function List(props: ListProps) {
   return (
     <ul>
-        {props.items.map((item, idx) =>
-          <li key={idx}>{item}</li>)}
-      </ul>
+      {props.items.map((item, idx) =>
+        <li key={idx}>{item}</li>)}
+    </ul>
   );
 }
 

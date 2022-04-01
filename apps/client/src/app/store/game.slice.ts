@@ -4,7 +4,7 @@ import {
   createSelector,
   createSlice,
   EntityState,
-  PayloadAction
+  PayloadAction,
 } from '@reduxjs/toolkit';
 
 export const GAME_FEATURE_KEY = 'game';
@@ -17,124 +17,155 @@ export interface GameEntity {
 }
 
 export interface GameState extends EntityState<GameEntity> {
-  selfId: string,
+  selfId: string;
   isEstablishingConnection: boolean;
   isConnected: boolean;
-  users: User[],
-  gameConfig: GameConfig,
-  selfRole: Role,
-  isGameStarted: boolean,
-  isDuringTurn: boolean,
-  turnCount: number,
-  rolePlaying: Role
+  users: User[];
+  gameConfig: GameConfig;
+  selfRole: Role;
+  partners: string[];
+  isGameStarted: boolean;
+  isDuringTurn: boolean;
+  turnCount: number;
+  rolePlaying: Role;
 }
 
 export const gameAdapter = createEntityAdapter<GameEntity>();
 
-
 export const initialGameState: GameState = gameAdapter.getInitialState({
-  selfId: "",
+  selfId: '',
   isEstablishingConnection: false,
   isConnected: false,
   users: [],
-  gameConfig: { "werewolf": 0, "villager": 0, "cupidon": 0, "sorcerer": 0 },
-  selfRole: "villager",
+  gameConfig: { werewolf: 0, villager: 0, cupidon: 0, sorcerer: 0 },
+  selfRole: 'villager',
+  partners: [],
   isGameStarted: false,
   isDuringTurn: false,
   turnCount: 0,
-  rolePlaying: "cupidon"
+  rolePlaying: 'cupidon',
 });
-
 
 export const gameSlice = createSlice({
   name: GAME_FEATURE_KEY,
   initialState: initialGameState,
   reducers: {
-    startConnecting: (state => {
+    startConnecting: (state) => {
       return {
         ...state,
-        isEstablishingConnection: true
-      }
-    }),
-    connectionEstablished: (state => {
+        isEstablishingConnection: true,
+      };
+    },
+    connectionEstablished: (state) => {
       return {
         ...state,
         isConnected: true,
-        isEstablishingConnection: true
-      }
-    }),
+        isEstablishingConnection: true,
+      };
+    },
     setSelfId: (state, action) => {
       return {
         ...state,
-        selfId: action.payload.selfId
-      }
+        selfId: action.payload.selfId,
+      };
     },
-    sendUser: ((state, action: PayloadAction<{ userName: string }>) => {
+    sendUser: (state, action: PayloadAction<{ userName: string }>) => {
       return;
-    }),
-    requestAllUsers: () => { return },
-    receiveAllUsers: ((state, action: PayloadAction<{
-      users: User[]
-    }>) => {
-      return {
-        ...state,
-        users: action.payload.users
-      }
-    }),
-    sendGameConfig: ((state, action: PayloadAction<{ gameConfig: GameConfig }>) => {
-      return;
-    }),
-    setGameConfig: (state, action: PayloadAction<{
-      gameConfig: GameConfig
-    }>) => {
-      return {
-        ...state,
-        gameConfig: action.payload.gameConfig
-      }
     },
-    sendGameStart: (() => {
+    requestAllUsers: () => {
       return;
-    }),
-    requestRole: ((state, action: PayloadAction<{ userID: string }>) => {
-      return;
-    }),
-    receiveRole: ((state, action: PayloadAction<{
-      selfRole: Role
-    }>) => {
+    },
+    receiveAllUsers: (
+      state,
+      action: PayloadAction<{
+        users: User[];
+      }>
+    ) => {
       return {
         ...state,
-        selfRole: action.payload.selfRole
-      }
-    }),
-    receiveGameStart: (state => {
+        users: action.payload.users,
+      };
+    },
+    sendGameConfig: (
+      state,
+      action: PayloadAction<{ gameConfig: GameConfig }>
+    ) => {
+      return;
+    },
+    setGameConfig: (
+      state,
+      action: PayloadAction<{
+        gameConfig: GameConfig;
+      }>
+    ) => {
       return {
         ...state,
-        isGameStarted: true
-      }
-    }),
+        gameConfig: action.payload.gameConfig,
+      };
+    },
+    sendGameStart: () => {
+      return;
+    },
+    requestRole: (state, action: PayloadAction<{ userID: string }>) => {
+      return;
+    },
+    receiveRole: (
+      state,
+      action: PayloadAction<{
+        selfRole: Role;
+      }>
+    ) => {
+      return {
+        ...state,
+        selfRole: action.payload.selfRole,
+      };
+    },
+    requestPartners: (state, action: PayloadAction<{ selfRole: Role }>) => {
+      return;
+    },
+    receivePartners: (
+      state,
+      action: PayloadAction<{
+        partners: string[];
+      }>
+    ) => {
+      return {
+        ...state,
+        partners: [...action.payload.partners],
+      };
+    },
+    receiveGameStart: (state) => {
+      return {
+        ...state,
+        isGameStarted: true,
+      };
+    },
     switchIsDuringTurn: (state) => {
       return {
         ...state,
-        isDuringTurn: !state.isDuringTurn
-      }
+        isDuringTurn: !state.isDuringTurn,
+      };
     },
-    sendTurnStart: (() => {
+    sendTurnStart: () => {
       return;
-    }),
+    },
     incrementTurnCount: (state) => {
       return {
         ...state,
-        turnCount: state.turnCount + 1
-      }
+        turnCount: state.turnCount + 1,
+      };
     },
-    requestRolePlaying: (() => {
+    requestRolePlaying: () => {
       return;
-    }),
-    receiveRolePlaying: (state, action: PayloadAction<{ rolePlaying: Role }>) => {
+    },
+    receiveRolePlaying: (
+      state,
+      action: PayloadAction<{ rolePlaying: Role }>
+    ) => {
       return {
         ...state,
-        rolePlaying: action.payload.rolePlaying
-      }
+        rolePlaying: action.payload.rolePlaying,
+      };
     },
   },
 });
@@ -183,11 +214,36 @@ const { selectAll, selectEntities } = gameAdapter.getSelectors();
 export const getGameState = (rootState: any): GameState =>
   rootState[GAME_FEATURE_KEY];
 
-export const selectSelfId = createSelector(getGameState, (state) => state.selfId);
+export const selectSelfId = createSelector(
+  getGameState,
+  (state) => state.selfId
+);
 export const selectUsers = createSelector(getGameState, (state) => state.users);
-export const selectGameConfig = createSelector(getGameState, (state) => state.gameConfig);
-export const selectIsGameStarted = createSelector(getGameState, (state) => state.isGameStarted);
-export const selectSelfRole = createSelector(getGameState, (state) => state.selfRole);
-export const selectIsDuringTurn = createSelector(getGameState, (state) => state.isDuringTurn);
-export const selectTurnCount = createSelector(getGameState, (state) => state.turnCount);
-export const selectRolePlaying = createSelector(getGameState, (state) => state.rolePlaying);
+export const selectGameConfig = createSelector(
+  getGameState,
+  (state) => state.gameConfig
+);
+export const selectIsGameStarted = createSelector(
+  getGameState,
+  (state) => state.isGameStarted
+);
+export const selectSelfRole = createSelector(
+  getGameState,
+  (state) => state.selfRole
+);
+export const selectPartners = createSelector(
+  getGameState,
+  (state) => state.partners
+);
+export const selectIsDuringTurn = createSelector(
+  getGameState,
+  (state) => state.isDuringTurn
+);
+export const selectTurnCount = createSelector(
+  getGameState,
+  (state) => state.turnCount
+);
+export const selectRolePlaying = createSelector(
+  getGameState,
+  (state) => state.rolePlaying
+);
