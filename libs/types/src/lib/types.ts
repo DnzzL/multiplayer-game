@@ -1,21 +1,21 @@
 export interface User {
-  userID: string
-  userName: string
-  isAlive: boolean
+  userID: string;
+  userName: string;
+  isAlive: boolean;
+  boundTo: string;
 }
 
-export type Role = "werewolf" | "villager" | "sorcerer" | "cupidon"
+export type Role = 'werewolf' | 'villager' | 'sorcerer' | 'cupidon';
 
 export interface Player extends User {
-  role: Role
+  role: Role;
 }
 
-
 export interface GameConfig {
-  werewolf: number
-  villager: number
-  sorcerer: number
-  cupidon: number
+  werewolf: number;
+  villager: number;
+  sorcerer: number;
+  cupidon: number;
 }
 
 export enum GameEvent {
@@ -33,14 +33,19 @@ export enum GameEvent {
   ReceivePartners = 'receive_partners',
   RequestRolePlaying = 'request_role_playing',
   ReceiveRolePlaying = 'receive_role_playing',
-  ReceiveTurnEnd = 'receive_turn_end'
+  ReceiveTurnEnd = 'receive_turn_end',
+  SendPlayerKilled = 'send_player_killed',
+  ReceivePlayerKilled = 'receive_player_killed',
+  SendPlayerBound = 'send_player_bound',
+  ReceivePlayerBound = 'receive_player_bound',
 }
 
+export const firstRoleOrder: Role[] = ['cupidon', 'werewolf', 'sorcerer'];
+export const roleOrder: Role[] = ['werewolf', 'sorcerer'];
+export const characterActions = {
+  cupidon: ['bind'],
+  werewolf: ['kill'],
+  sorcerer: ['kill', 'save', 'pass'],
+};
 
-export const firstRoleOrder: Role[] = ["cupidon", "werewolf", "sorcerer"]
-export const roleOrder: Role[] = ["werewolf", "sorcerer"]
-export const actions = {
-  "cupidon": ["bind"],
-  "werewolf": ["kill"],
-  "sorcerer": ["kill", "save", "pass"]
-}
+export const actions = ['bind', 'kill', 'save', 'pass'];

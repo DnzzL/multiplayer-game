@@ -1,6 +1,8 @@
 import { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import List from '../../list/list';
+import CupidonActionList from '../../components/cupidon-action-list/cupidon-action-list';
+import List from '../../components/list/list';
+import WerewolfActionList from '../../components/werewolf-action-list/werewolf-action-list';
 import {
   gameActions,
   selectIsDuringTurn,
@@ -8,6 +10,7 @@ import {
   selectRolePlaying,
   selectSelfId,
   selectSelfRole,
+  selectSelfUser,
   selectUsers,
 } from '../../store/game.slice';
 
@@ -16,6 +19,7 @@ export function Game() {
   const selfRole = useSelector(selectSelfRole);
   const selfId = useSelector(selectSelfId);
   const users = useSelector(selectUsers);
+  const selfUser = useSelector(selectSelfUser);
   const isDuringTurn = useSelector(selectIsDuringTurn);
   const rolePlaying = useSelector(selectRolePlaying);
   const partners = useSelector(selectPartners);
@@ -52,47 +56,41 @@ export function Game() {
     dispatch(gameActions.requestRolePlaying());
   }, [rolePlaying, dispatch]);
 
-  interface WerewolfActionListProps {
-    items: string[];
-  }
-  const WerewolfActionList = (props: WerewolfActionListProps) => {
-    return (
-      <form>
-        {props.items.map((item) => (
-          <label htmlFor={item}>
-            <input id={item} type="checkbox" name="target" /> {item}
-          </label>
-        ))}
-        <button type="submit">Submit</button>
-      </form>
-    );
-  };
-
   return (
     <div className="game">
       <h1>Players</h1>
       {<List items={users.map((u) => u.userName)}></List>}
       {selfRole && <p>You are a {selfRole}</p>}
+      {selfUser && selfUser.boundTo !== '' && (
+        <p>You are a bound to {selfUser.boundTo}</p>
+      )}
       {isRoomMaster()
         ? !isDuringTurn && <button onClick={handleClick}>Start Turn</button>
         : null}
-      {isDuringTurn && selfRole === rolePlaying && <p>You are playing</p> && (
-        <button onClick={handleDone}>Done</button>
-      )}
-      {isDuringTurn &&
-        selfRole === rolePlaying &&
-        rolePlaying === 'werewolf' && (
-          <WerewolfActionList
-            items={users
-              .filter(
-                (user) =>
-                  user.userID !== selfId &&
-                  user.isAlive &&
-                  !partners.includes(user.userID)
-              )
-              .map((u) => u.userName)}
-          ></WerewolfActionList>
-        )}
+      {isDuringTurn && selfRole === rolePlaying && <p>You are playing</p>}
+      {isDuringTurn && selfRole === rolePlaying ? (
+        rolePlaying === 'werewolf' ? (
+          <>
+            <WerewolfActionList
+              items={users
+                .filter(
+                  (user) =>
+                    user.userID !== selfId &&
+                    user.isAlive &&
+                    !partners.includes(user.userID)
+                )
+                .map((u) => u.userName)}
+              handleDone={handleDone}
+            ></WerewolfActionList>
+            <button onClick={handleDone}>Done</button>
+          </>
+        ) : selfRole === rolePlaying && rolePlaying === 'cupidon' ? (
+          <CupidonActionList
+            items={users.map((user) => user.userName)}
+            handleDone={handleDone}
+          ></CupidonActionList>
+        ) : null
+      ) : null}
     </div>
   );
 }

@@ -167,6 +167,77 @@ export const gameSlice = createSlice({
         rolePlaying: action.payload.rolePlaying,
       };
     },
+    sendPlayerBound: (
+      state,
+      action: PayloadAction<{ userNameA: string; userNameB: string }>
+    ) => {
+      return;
+    },
+    bindPlayers: (
+      state,
+      action: PayloadAction<{ userNameA: string; userNameB: string }>
+    ) => {
+      console.log(action.payload);
+      const userA = state.users.find(
+        (user) => user.userName === action.payload.userNameA
+      );
+      const indexA = state.users.findIndex(
+        (user) => user.userName === action.payload.userNameA
+      );
+      const userB = state.users.find(
+        (user) => user.userName === action.payload.userNameB
+      );
+      const indexB = state.users.findIndex(
+        (user) => user.userName === action.payload.userNameB
+      );
+      return userA && userB
+        ? indexA < indexB
+          ? {
+              ...state,
+              users: [
+                ...state.users.slice(0, indexA),
+                { ...userA, boundTo: userB.userName },
+                ...state.users.slice(indexA + 1, indexB),
+                { ...userB, boundTo: userA.userName },
+                ...state.users.slice(indexB + 1),
+              ],
+            }
+          : {
+              ...state,
+              users: [
+                ...state.users.slice(0, indexB),
+                { ...userB, boundTo: userA.userName },
+                ...state.users.slice(indexB + 1, indexA),
+                { ...userA, boundTo: userB.userName },
+                ...state.users.slice(indexA + 1),
+              ],
+            }
+        : state;
+    },
+    sendPlayerKilled: (state, action: PayloadAction<{ userName: string }>) => {
+      return;
+    },
+    receivePlayerKilled: (
+      state,
+      action: PayloadAction<{ userName: string }>
+    ) => {
+      const user = state.users.find(
+        (user) => user.userName === action.payload.userName
+      );
+      const index = state.users.findIndex(
+        (user) => user.userName === action.payload.userName
+      );
+      return user
+        ? {
+            ...state,
+            users: [
+              ...state.users.slice(0, index),
+              { ...user, isAlive: false },
+              ...state.users.slice(index + 1),
+            ],
+          }
+        : state;
+    },
   },
 });
 
@@ -219,6 +290,9 @@ export const selectSelfId = createSelector(
   (state) => state.selfId
 );
 export const selectUsers = createSelector(getGameState, (state) => state.users);
+export const selectSelfUser = createSelector(getGameState, (state) =>
+  state.users.find((user) => user.userID === state.selfId)
+);
 export const selectGameConfig = createSelector(
   getGameState,
   (state) => state.gameConfig

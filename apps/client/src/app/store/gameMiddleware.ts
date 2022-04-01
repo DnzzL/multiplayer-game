@@ -45,6 +45,15 @@ const gameMiddleware: Middleware = (store) => {
       socket.on(GameEvent.ReceiveTurnEnd, () => {
         store.dispatch(gameActions.switchIsDuringTurn());
       });
+
+      socket.on(GameEvent.ReceivePlayerBound, (userNames: string[]) => {
+        const [userNameA, userNameB] = userNames;
+        store.dispatch(gameActions.bindPlayers({ userNameA, userNameB }));
+      });
+
+      socket.on(GameEvent.ReceivePlayerKilled, (userName: string) => {
+        store.dispatch(gameActions.receivePlayerKilled({ userName }));
+      });
     }
 
     if (isConnectionEstablished) {
@@ -72,6 +81,15 @@ const gameMiddleware: Middleware = (store) => {
       }
       if (gameActions.requestRolePlaying.match(action)) {
         socket.emit(GameEvent.RequestRolePlaying);
+      }
+      if (gameActions.sendPlayerBound.match(action)) {
+        socket.emit(GameEvent.SendPlayerBound, {
+          userNameA: action.payload.userNameA,
+          userNameB: action.payload.userNameB,
+        });
+      }
+      if (gameActions.sendPlayerKilled.match(action)) {
+        socket.emit(GameEvent.SendPlayerKilled, action.payload.userName);
       }
     }
 

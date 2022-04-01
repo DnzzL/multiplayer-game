@@ -25,15 +25,17 @@ const io = new Server(server, {
 
 // game(io) -> is giving weird behaviors
 const users = new Array<User>();
-const players = new Array<Player>();
+let players = new Array<Player>();
 let gameConfig: GameConfig;
 let turnCount = 0;
 let currentTurnOrder = 0;
+let currentTurnKilled = [];
 
 function handleUser(socket, userName) {
   console.log('%s has connected', userName);
   const user = {
     isAlive: true,
+    boundTo: '',
     userID: socket.id,
     userName,
   };
@@ -74,7 +76,7 @@ function handleRoleRequest(
   socket: Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, unknown>,
   userID: string
 ) {
-  const role = players.find((player) => player.userID === userID).role;
+  const role = players.find((player) => player.userID === userID)?.role;
   socket.emit(GameEvent.ReceiveRole, role);
 }
 
@@ -105,6 +107,10 @@ function handleSendRolePlaying(
   } else {
     currentTurnOrder = 0;
     io.sockets.emit(GameEvent.ReceiveTurnEnd);
+    currentTurnKilled.forEach((userName) => {
+      io.sockets.emit(GameEvent.ReceivePlayerKilled, userName);
+    });
+    currentTurnKilled = [];
   }
 }
 
@@ -122,6 +128,34 @@ function handlePartnerRequest(
           .map((player) => player.userID)
       )
     : null;
+}
+
+function handlePlayerBound(
+  io: Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
+  userNameA: string,
+  userNameB: string
+): void {
+  if (userNameA === '' || userNameB === '') {
+    return;
+  }
+  for (const userName of [userNameA, userNameB]) {
+    io.sockets
+      .to(users.find((user) => user.userName === userName).userID)
+      .emit(GameEvent.ReceivePlayerBound, [userNameA, userNameB]);
+  }
+}
+
+function handlePlayerKilled(userName: string): void {
+  currentTurnKilled.push(userName);
+  const player = players.find((player) => player.userName === userName);
+  const index = players.findIndex((player) => player.userName === userName);
+  players = players
+    ? [
+        ...players.slice(0, index),
+        { ...player, isAlive: false },
+        ...players.slice(index + 1),
+      ]
+    : players;
 }
 
 io.on('connection', (socket) => {
@@ -143,6 +177,12 @@ io.on('connection', (socket) => {
   );
   socket.on(GameEvent.SendTurnStart, () => handleTurnStart());
   socket.on(GameEvent.RequestRolePlaying, () => handleSendRolePlaying(io));
+  socket.on(GameEvent.SendPlayerBound, ({ userNameA, userNameB }) =>
+    handlePlayerBound(io, userNameA, userNameB)
+  );
+  socket.on(GameEvent.SendPlayerKilled, (userName: string) =>
+    handlePlayerKilled(userName)
+  );
 });
 
 server.listen(3000, () => {
