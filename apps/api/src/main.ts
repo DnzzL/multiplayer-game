@@ -66,14 +66,20 @@ function handleTurnStart() {
   currentTurnOrder = 0
   turnCount++
   console.log("starting turn", turnCount)
+  io.sockets.emit(GameEvent.ReceiveTurnStart)
 }
 
 function handleSendRolePlaying(io: Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, unknown>) {
   const assignedRoles = Object.keys(gameConfig)
     .filter((k) => Object(gameConfig)[k] > 0)
-  const rolePlaying = turnCount === 0 ? firstRoleOrder.filter(role => assignedRoles.includes(role))[currentTurnOrder] : roleOrder.filter(role => assignedRoles.includes(role))[currentTurnOrder]
-  io.sockets.emit(GameEvent.ReceiveRolePlaying, rolePlaying)
-  currentTurnOrder = currentTurnOrder <= assignRoles.length - 1 ? currentTurnOrder + 1 : 0
+  if (currentTurnOrder <= assignRoles.length) {
+    const rolePlaying = turnCount === 1 ? firstRoleOrder.filter(role => assignedRoles.includes(role))[currentTurnOrder] : roleOrder.filter(role => assignedRoles.includes(role))[currentTurnOrder]
+    io.sockets.emit(GameEvent.ReceiveRolePlaying, rolePlaying)
+    currentTurnOrder = currentTurnOrder + 1
+  } else {
+    currentTurnOrder = 0
+    io.sockets.emit(GameEvent.ReceiveTurnEnd)
+  }
 }
 
 io.on('connection', (socket) => {

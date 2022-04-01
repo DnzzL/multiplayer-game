@@ -31,8 +31,17 @@ const gameMiddleware: Middleware = store => {
                 store.dispatch(gameActions.receiveRole({ selfRole }))
             })
 
+            socket.on(GameEvent.ReceiveTurnStart, () => {
+                store.dispatch(gameActions.switchIsDuringTurn())
+                store.dispatch(gameActions.incrementTurnCount())
+            })
+
             socket.on(GameEvent.ReceiveRolePlaying, (rolePlaying: Role) => {
                 store.dispatch(gameActions.receiveRolePlaying({ rolePlaying }))
+            })
+
+            socket.on(GameEvent.ReceiveTurnEnd, () => {
+                store.dispatch(gameActions.switchIsDuringTurn())
             })
         }
 

@@ -30,7 +30,8 @@ export enum GameEvent {
   SendTurnStart = 'send_turn_start',
   ReceiveTurnStart = 'receive_turn_start',
   RequestRolePlaying = 'request_role_playing',
-  ReceiveRolePlaying = 'receive_role_playing'
+  ReceiveRolePlaying = 'receive_role_playing',
+  ReceiveTurnEnd = 'receive_turn_end'
 }
 
 

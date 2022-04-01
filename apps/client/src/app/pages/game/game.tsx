@@ -29,8 +29,7 @@ export function Game() {
   const handleClick = () => {
     const text = "La nuit tombe sur le village ... Fermez vos yeux"
     textToSpeech(text)
-    dispatch(gameActions.switchIsDuringTurn())
-    dispatch(gameActions.incrementTurnCount())
+    dispatch(gameActions.sendTurnStart())
     dispatch(gameActions.requestRolePlaying())
   }
 
@@ -52,7 +51,7 @@ export function Game() {
         : isRoomMaster() ? <button onClick={handleClick}>Start Turn</button> : null
       } */}
       {isRoomMaster() ? !isDuringTurn && <button onClick={handleClick}>Start Turn</button> : null}
-      {selfRole === rolePlaying && <p>You are playing</p> && <button onClick={handleDone}>Done</button>}
+      {isDuringTurn && selfRole === rolePlaying && <p>You are playing</p> && <button onClick={handleDone}>Done</button>}
     </div>
   );
 }
