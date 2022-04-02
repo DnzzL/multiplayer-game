@@ -24,7 +24,7 @@ const io = new Server(server, {
 });
 
 // game(io) -> is giving weird behaviors
-const users = new Array<User>();
+let users = new Array<User>();
 let players = new Array<Player>();
 let gameConfig: GameConfig;
 let turnCount = 0;
@@ -62,6 +62,15 @@ function assignRoles(shuffled) {
   users.forEach((user, idx) => {
     players.push({ ...user, role: shuffled[idx] as Role });
   });
+}
+
+function handleRoomMaster(
+  io: Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, unknown>
+) {
+  if (users.length === 0) {
+    return;
+  }
+  io.sockets.emit(GameEvent.ReceiveRoomMaster, users.sort()[0].userID);
 }
 
 function handleGameStart(
@@ -103,13 +112,18 @@ function endTurn() {
         !currentTurnRevived.includes(userName) ||
         reviveCounts[userName] < killCounts[userName]
     )
+    .filter((value, index, self) => self.indexOf(value) === index)
     .forEach((userName) => {
       io.sockets.emit(GameEvent.ReceivePlayerKilled, userName);
+      const user = users.find((user) => user.userName === userName);
+      if (user.boundTo !== '') {
+        io.sockets.emit(GameEvent.ReceivePlayerKilled, user.boundTo);
+      }
     });
   if (!werewolfAlive()) {
-    io.sockets.emit(GameEvent.ReceiveGameEnd, 'villager');
+    io.sockets.emit(GameEvent.ReceiveGameOver, 'villager');
   } else if (!villagerAlive()) {
-    io.sockets.emit(GameEvent.ReceiveGameEnd, 'werewolf');
+    io.sockets.emit(GameEvent.ReceiveGameOver, 'werewolf');
   } else {
     currentTurnOrder = 0;
     currentTurnKilled = [];
@@ -157,7 +171,7 @@ function handlePartnerRequest(
 }
 
 function handlePlayerBound(
-  io: Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
+  io: Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, unknown>,
   userNameA: string,
   userNameB: string
 ): void {
@@ -215,6 +229,7 @@ io.on('connection', (socket) => {
   socket.on(GameEvent.SendUser, (userName: string) =>
     handleUser(socket, userName)
   );
+  socket.on(GameEvent.RequestRoomMaster, () => handleRoomMaster(io));
   socket.on(GameEvent.RequestAllUsers, () => {
     io.sockets.emit(GameEvent.ReceiveAllUsers, users);
   });
@@ -239,6 +254,25 @@ io.on('connection', (socket) => {
   socket.on(GameEvent.SendPlayerRevived, (userName: string) =>
     handlePlayerRevived(userName)
   );
+  socket.on(GameEvent.SendGameEnd, () => {
+    io.sockets.emit(GameEvent.ReceiveGameEnd);
+  });
+});
+
+io.on('disconnect', (socket) => {
+  const user = users.find((user) => user.userID === socket.id);
+  if (user) {
+    console.log(user.userName + ' disconnected');
+    io.sockets.emit(GameEvent.ReceivePlayerDisconnected, user.userID);
+    const index = users.findIndex((user) => user.userID === socket.id);
+    users = users
+      ? [
+          ...users.slice(0, index),
+          { ...user, userName: '', boundTo: '' },
+          ...users.slice(index + 1),
+        ]
+      : users;
+  }
 });
 
 server.listen(3000, () => {

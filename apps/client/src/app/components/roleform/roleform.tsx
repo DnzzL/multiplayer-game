@@ -9,12 +9,13 @@ export interface RoleFormProps {
 
 export function RoleForm(props: RoleFormProps) {
   const dispatch = useDispatch();
-  const { register, handleSubmit } = useForm();
+  const { register, handleSubmit, reset } = useForm();
   const gameConfig = useSelector(selectGameConfig);
 
   const onSubmit = (_: any) => {
     dispatch(gameActions.sendGameConfig({ gameConfig }));
     dispatch(gameActions.sendGameStart());
+    reset();
   };
 
   const onChange = (gameConfig: any) => {

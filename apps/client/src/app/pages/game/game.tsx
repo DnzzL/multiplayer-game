@@ -9,8 +9,10 @@ import WerewolfActionList from '../../components/werewolf-action-list/werewolf-a
 import {
   gameActions,
   selectIsDuringTurn,
+  selectIsGameStarted,
   selectPartners,
   selectRolePlaying,
+  selectRoomMaster,
   selectSelfId,
   selectSelfRole,
   selectSelfUser,
@@ -22,7 +24,9 @@ import { textToSpeech } from '../../utils';
 export function Game() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const isGameStarted = useSelector(selectIsGameStarted);
   const selfRole = useSelector(selectSelfRole);
+  const roomMaster = useSelector(selectRoomMaster);
   const selfId = useSelector(selectSelfId);
   const users = useSelector(selectUsers);
   const selfUser = useSelector(selectSelfUser);
@@ -32,6 +36,7 @@ export function Game() {
   const winner = useSelector(selectWinner);
 
   useEffect(() => {
+    dispatch(gameActions.requestRoomMaster());
     dispatch(gameActions.requestRole({ userID: selfId }));
   }, [selfId, dispatch]);
 
@@ -39,9 +44,11 @@ export function Game() {
     dispatch(gameActions.requestPartners({ selfRole }));
   }, [selfRole, dispatch]);
 
-  const isRoomMaster = useCallback(() => {
-    return users && users.length > 0 && selfId === users[0].userID;
-  }, [selfId, users]);
+  useEffect(() => {
+    if (!isGameStarted) {
+      navigate('/room');
+    }
+  }, [isGameStarted, navigate]);
 
   const handleTurnStart = () => {
     dispatch(gameActions.sendTurnStart());
@@ -65,12 +72,12 @@ export function Game() {
       {winner ? (
         <>
           <p>Les {translatedRoles[winner]} ont gagné la partie</p>
-          <button onClick={() => navigate('/room')}>
+          <button onClick={() => dispatch(gameActions.sendGameEnd())}>
             Recommencer une partie
           </button>
         </>
       ) : null}
-      {isRoomMaster() && !isDuringTurn && !winner ? (
+      {roomMaster === selfId && !isDuringTurn && !winner ? (
         <button onClick={handleTurnStart}>Start Turn</button>
       ) : null}
       {isDuringTurn && selfRole === rolePlaying && <p>A toi de jouer</p>}

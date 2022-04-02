@@ -18,6 +18,10 @@ const gameMiddleware: Middleware = (store) => {
         socket.emit(GameEvent.RequestAllUsers);
       });
 
+      socket.on(GameEvent.ReceiveRoomMaster, (roomMaster: string) => {
+        store.dispatch(gameActions.receiveRoomMaster({ roomMaster }));
+      });
+
       socket.on(GameEvent.ReceiveAllUsers, (users: User[]) => {
         store.dispatch(gameActions.receiveAllUsers({ users }));
       });
@@ -62,8 +66,12 @@ const gameMiddleware: Middleware = (store) => {
         store.dispatch(gameActions.receivePlayerRevived({ userName }));
       });
 
-      socket.on(GameEvent.ReceiveGameEnd, (winner: Role) => {
-        store.dispatch(gameActions.receiveGameEnd({ winner }));
+      socket.on(GameEvent.ReceiveGameOver, (winner: Role) => {
+        store.dispatch(gameActions.receiveGameOver({ winner }));
+      });
+
+      socket.on(GameEvent.ReceiveGameEnd, () => {
+        store.dispatch(gameActions.receiveGameEnd());
       });
     }
 
@@ -71,6 +79,9 @@ const gameMiddleware: Middleware = (store) => {
       if (gameActions.sendUser.match(action)) {
         store.dispatch(gameActions.setSelfId({ selfId: socket.id }));
         socket.emit(GameEvent.SendUser, action.payload.userName);
+      }
+      if (gameActions.requestRoomMaster.match(action)) {
+        socket.emit(GameEvent.RequestRoomMaster);
       }
       if (gameActions.requestAllUsers.match(action)) {
         socket.emit(GameEvent.RequestAllUsers);
@@ -104,6 +115,9 @@ const gameMiddleware: Middleware = (store) => {
       }
       if (gameActions.sendPlayerRevived.match(action)) {
         socket.emit(GameEvent.SendPlayerRevived, action.payload.userName);
+      }
+      if (gameActions.sendGameEnd.match(action)) {
+        socket.emit(GameEvent.SendGameEnd);
       }
     }
 

@@ -26,6 +26,9 @@ export interface GameConfig {
 
 export enum GameEvent {
   SendUser = 'send_user',
+  ReceivePlayerDisconnected = 'receive_player_disconnected',
+  RequestRoomMaster = 'request_room_master',
+  ReceiveRoomMaster = 'receive_room_master',
   RequestAllUsers = 'request_all_users',
   ReceiveAllUsers = 'receive_all_users',
   SendGameConfig = 'send_game_config',
@@ -46,6 +49,8 @@ export enum GameEvent {
   ReceivePlayerRevived = 'receive_player_revived',
   SendPlayerBound = 'send_player_bound',
   ReceivePlayerBound = 'receive_player_bound',
+  ReceiveGameOver = 'receive_game_over',
+  SendGameEnd = 'send_game_end',
   ReceiveGameEnd = 'receive_game_end',
 }
 

@@ -21,6 +21,7 @@ export interface GameState extends EntityState<GameEntity> {
   isEstablishingConnection: boolean;
   isConnected: boolean;
   users: User[];
+  roomMaster: string;
   gameConfig: GameConfig;
   selfRole: Role;
   partners: string[];
@@ -38,6 +39,7 @@ export const initialGameState: GameState = gameAdapter.getInitialState({
   isEstablishingConnection: false,
   isConnected: false,
   users: [],
+  roomMaster: 'none',
   gameConfig: { werewolf: 0, villager: 0, cupidon: 0, sorcerer: 0 },
   selfRole: 'villager',
   partners: [],
@@ -73,6 +75,20 @@ export const gameSlice = createSlice({
     },
     sendUser: (state, action: PayloadAction<{ userName: string }>) => {
       return;
+    },
+    requestRoomMaster: () => {
+      return;
+    },
+    receiveRoomMaster: (
+      state,
+      action: PayloadAction<{
+        roomMaster: string;
+      }>
+    ) => {
+      return {
+        ...state,
+        roomMaster: action.payload.roomMaster,
+      };
     },
     requestAllUsers: () => {
       return;
@@ -264,12 +280,20 @@ export const gameSlice = createSlice({
           }
         : state;
     },
-    receiveGameEnd: (state, action: PayloadAction<{ winner: Role }>) => {
+    receiveGameOver: (state, action: PayloadAction<{ winner: Role }>) => {
+      return {
+        ...state,
+        isDuringTurn: false,
+        winner: action.payload.winner,
+      };
+    },
+    sendGameEnd: () => {
+      return;
+    },
+    receiveGameEnd: (state) => {
       return {
         ...state,
         isGameStarted: false,
-        isDuringTurn: false,
-        winner: action.payload.winner,
       };
     },
   },
@@ -320,6 +344,10 @@ export const getGameState = (rootState: any): GameState =>
 export const selectSelfId = createSelector(
   getGameState,
   (state) => state.selfId
+);
+export const selectRoomMaster = createSelector(
+  getGameState,
+  (state) => state.roomMaster
 );
 export const selectUsers = createSelector(getGameState, (state) => state.users);
 export const selectSelfUser = createSelector(getGameState, (state) =>
