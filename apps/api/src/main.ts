@@ -19,7 +19,6 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: 'http://localhost:3000',
-    credentials: true,
   },
 });
 
@@ -155,7 +154,7 @@ function handleSendRolePlaying(
 }
 
 function handlePartnerRequest(
-  socket: Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
+  socket: Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, unknown>,
   role: Role
 ): void {
   role === 'werewolf'
@@ -226,9 +225,9 @@ function villagerAlive(): boolean {
 }
 
 io.on('connection', (socket) => {
-  socket.on(GameEvent.SendUser, (userName: string) =>
-    handleUser(socket, userName)
-  );
+  socket.on(GameEvent.SendUser, (userName: string) => {
+    handleUser(socket, userName);
+  });
   socket.on(GameEvent.RequestRoomMaster, () => handleRoomMaster(io));
   socket.on(GameEvent.RequestAllUsers, () => {
     io.sockets.emit(GameEvent.ReceiveAllUsers, users);

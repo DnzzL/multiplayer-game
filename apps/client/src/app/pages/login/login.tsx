@@ -1,29 +1,30 @@
-import { useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
-import {
-  useNavigate
-} from "react-router-dom";
-import { gameActions } from "../../store/game.slice";
-
+import { useCallback, useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { gameActions } from '../../store/game.slice';
 
 export function Login() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [userName, setUsername] = useState("")
+  const [userName, setUsername] = useState('');
 
   const onClick = useCallback(() => {
-    if (userName !== "") {
-      dispatch(gameActions.sendUser({ userName }))
-      navigate("/room")
+    if (userName !== '') {
+      dispatch(gameActions.sendUser({ userName }));
+      navigate('/room');
     }
-  }, [userName, dispatch, navigate])
+  }, [userName, dispatch, navigate]);
 
   return (
     <div className="app">
-      <input type="text" name="name" value={userName} onChange={(event) => setUsername(event.target.value)} />
-      <input type="submit" name="name" onClick={onClick} />
+      <input
+        type="text"
+        name="name"
+        value={userName}
+        onChange={(event) => setUsername(event.target.value)}
+      />
+      <input type="submit" name="name" value="Rejoindre" onClick={onClick} />
     </div>
-
   );
 }
 

@@ -61,10 +61,14 @@ export function RoleForm(props: RoleFormProps) {
         />
         <div>
           {rolesCount() !== props.userCount && (
-            <p>wrong nomber of roles chosen</p>
+            <p>mauvais nombre de roles choisis</p>
           )}
         </div>
-        <input type="submit" disabled={rolesCount() !== props.userCount} />
+        <input
+          type="submit"
+          value="Commencer"
+          disabled={rolesCount() !== props.userCount}
+        />
       </form>
     </div>
   );
