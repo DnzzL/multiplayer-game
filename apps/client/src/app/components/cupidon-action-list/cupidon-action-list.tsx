@@ -33,7 +33,7 @@ function CupidonActionList(props: CupidonActionListProps) {
         </label>
       ))}
       <button type="submit" disabled={selectedPlayers.length !== 2}>
-        Submit
+        Finish
       </button>
     </form>
   );

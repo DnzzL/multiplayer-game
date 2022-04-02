@@ -1,7 +1,10 @@
+import { translatedRoles } from '@loup-garou/types';
 import { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router';
 import CupidonActionList from '../../components/cupidon-action-list/cupidon-action-list';
 import List from '../../components/list/list';
+import SorcererActionList from '../../components/sorcerer-action-list/sorcerer-action-list';
 import WerewolfActionList from '../../components/werewolf-action-list/werewolf-action-list';
 import {
   gameActions,
@@ -12,10 +15,13 @@ import {
   selectSelfRole,
   selectSelfUser,
   selectUsers,
+  selectWinner,
 } from '../../store/game.slice';
+import { textToSpeech } from '../../utils';
 
 export function Game() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const selfRole = useSelector(selectSelfRole);
   const selfId = useSelector(selectSelfId);
   const users = useSelector(selectUsers);
@@ -23,6 +29,7 @@ export function Game() {
   const isDuringTurn = useSelector(selectIsDuringTurn);
   const rolePlaying = useSelector(selectRolePlaying);
   const partners = useSelector(selectPartners);
+  const winner = useSelector(selectWinner);
 
   useEffect(() => {
     dispatch(gameActions.requestRole({ userID: selfId }));
@@ -32,63 +39,65 @@ export function Game() {
     dispatch(gameActions.requestPartners({ selfRole }));
   }, [selfRole, dispatch]);
 
-  const textToSpeech = (text: string) => {
-    const synth = window.speechSynthesis;
-    const utterThis = new SpeechSynthesisUtterance(text);
-    utterThis.lang = 'fr-FR';
-    synth.speak(utterThis);
-  };
-
   const isRoomMaster = useCallback(() => {
     return users && users.length > 0 && selfId === users[0].userID;
   }, [selfId, users]);
 
-  const handleClick = () => {
-    const text = 'La nuit tombe sur le village ... Fermez vos yeux';
-    textToSpeech(text);
+  const handleTurnStart = () => {
     dispatch(gameActions.sendTurnStart());
     dispatch(gameActions.requestRolePlaying());
   };
 
   const handleDone = useCallback(() => {
-    const text = `Les ${rolePlaying} vous pouvez fermer les yeux.`;
+    const text = `Les ${translatedRoles[rolePlaying]} vous pouvez fermer les yeux.`;
     textToSpeech(text);
     dispatch(gameActions.requestRolePlaying());
   }, [rolePlaying, dispatch]);
 
   return (
     <div className="game">
-      <h1>Players</h1>
+      <h1>Joueurs</h1>
       {<List items={users.map((u) => u.userName)}></List>}
-      {selfRole && <p>You are a {selfRole}</p>}
+      {selfRole && <p>Tu es un {translatedRoles[selfRole]}</p>}
       {selfUser && selfUser.boundTo !== '' && (
-        <p>You are a bound to {selfUser.boundTo}</p>
+        <p>Tu es lié à {selfUser.boundTo}</p>
       )}
-      {isRoomMaster()
-        ? !isDuringTurn && <button onClick={handleClick}>Start Turn</button>
-        : null}
-      {isDuringTurn && selfRole === rolePlaying && <p>You are playing</p>}
+      {winner ? (
+        <>
+          <p>Les {translatedRoles[winner]} ont gagné la partie</p>
+          <button onClick={() => navigate('/room')}>
+            Recommencer une partie
+          </button>
+        </>
+      ) : null}
+      {isRoomMaster() && !isDuringTurn && !winner ? (
+        <button onClick={handleTurnStart}>Start Turn</button>
+      ) : null}
+      {isDuringTurn && selfRole === rolePlaying && <p>A toi de jouer</p>}
       {isDuringTurn && selfRole === rolePlaying ? (
         rolePlaying === 'werewolf' ? (
-          <>
-            <WerewolfActionList
-              items={users
-                .filter(
-                  (user) =>
-                    user.userID !== selfId &&
-                    user.isAlive &&
-                    !partners.includes(user.userID)
-                )
-                .map((u) => u.userName)}
-              handleDone={handleDone}
-            ></WerewolfActionList>
-            <button onClick={handleDone}>Done</button>
-          </>
+          <WerewolfActionList
+            items={users
+              .filter(
+                (user) =>
+                  user.userID !== selfId &&
+                  user.isAlive &&
+                  !partners.includes(user.userID)
+              )
+              .map((u) => u.userName)}
+            handleDone={handleDone}
+          ></WerewolfActionList>
         ) : selfRole === rolePlaying && rolePlaying === 'cupidon' ? (
           <CupidonActionList
             items={users.map((user) => user.userName)}
             handleDone={handleDone}
           ></CupidonActionList>
+        ) : selfRole === rolePlaying && rolePlaying === 'sorcerer' ? (
+          <SorcererActionList
+            players={users.map((user) => user.userName)}
+            actions={['kill', 'save', 'pass']}
+            handleDone={handleDone}
+          ></SorcererActionList>
         ) : null
       ) : null}
     </div>

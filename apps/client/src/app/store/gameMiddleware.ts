@@ -1,6 +1,7 @@
-import { GameEvent, Role, User } from '@loup-garou/types';
+import { GameEvent, Role, translatedRoles, User } from '@loup-garou/types';
 import { Middleware } from 'redux';
 import { io, Socket } from 'socket.io-client';
+import { textToSpeech } from '../utils';
 import { gameActions } from './game.slice';
 
 const gameMiddleware: Middleware = (store) => {
@@ -34,12 +35,14 @@ const gameMiddleware: Middleware = (store) => {
       });
 
       socket.on(GameEvent.ReceiveTurnStart, () => {
+        textToSpeech('La nuit tombe sur le village ... Fermez vos yeux');
         store.dispatch(gameActions.switchIsDuringTurn());
         store.dispatch(gameActions.incrementTurnCount());
       });
 
       socket.on(GameEvent.ReceiveRolePlaying, (rolePlaying: Role) => {
         store.dispatch(gameActions.receiveRolePlaying({ rolePlaying }));
+        textToSpeech(`Les ${translatedRoles[rolePlaying]} à vous de jouer`);
       });
 
       socket.on(GameEvent.ReceiveTurnEnd, () => {
@@ -53,6 +56,14 @@ const gameMiddleware: Middleware = (store) => {
 
       socket.on(GameEvent.ReceivePlayerKilled, (userName: string) => {
         store.dispatch(gameActions.receivePlayerKilled({ userName }));
+      });
+
+      socket.on(GameEvent.ReceivePlayerRevived, (userName: string) => {
+        store.dispatch(gameActions.receivePlayerRevived({ userName }));
+      });
+
+      socket.on(GameEvent.ReceiveGameEnd, (winner: Role) => {
+        store.dispatch(gameActions.receiveGameEnd({ winner }));
       });
     }
 
@@ -90,6 +101,9 @@ const gameMiddleware: Middleware = (store) => {
       }
       if (gameActions.sendPlayerKilled.match(action)) {
         socket.emit(GameEvent.SendPlayerKilled, action.payload.userName);
+      }
+      if (gameActions.sendPlayerRevived.match(action)) {
+        socket.emit(GameEvent.SendPlayerRevived, action.payload.userName);
       }
     }
 

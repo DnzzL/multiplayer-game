@@ -28,6 +28,7 @@ export interface GameState extends EntityState<GameEntity> {
   isDuringTurn: boolean;
   turnCount: number;
   rolePlaying: Role;
+  winner: Role | null;
 }
 
 export const gameAdapter = createEntityAdapter<GameEntity>();
@@ -44,6 +45,7 @@ export const initialGameState: GameState = gameAdapter.getInitialState({
   isDuringTurn: false,
   turnCount: 0,
   rolePlaying: 'cupidon',
+  winner: null,
 });
 
 export const gameSlice = createSlice({
@@ -238,6 +240,38 @@ export const gameSlice = createSlice({
           }
         : state;
     },
+    sendPlayerRevived: (state, action: PayloadAction<{ userName: string }>) => {
+      return;
+    },
+    receivePlayerRevived: (
+      state,
+      action: PayloadAction<{ userName: string }>
+    ) => {
+      const user = state.users.find(
+        (user) => user.userName === action.payload.userName
+      );
+      const index = state.users.findIndex(
+        (user) => user.userName === action.payload.userName
+      );
+      return user
+        ? {
+            ...state,
+            users: [
+              ...state.users.slice(0, index),
+              { ...user, isAlive: true },
+              ...state.users.slice(index + 1),
+            ],
+          }
+        : state;
+    },
+    receiveGameEnd: (state, action: PayloadAction<{ winner: Role }>) => {
+      return {
+        ...state,
+        isGameStarted: false,
+        isDuringTurn: false,
+        winner: action.payload.winner,
+      };
+    },
   },
 });
 
@@ -280,8 +314,6 @@ export const gameActions = gameSlice.actions;
  *
  * See: https://react-redux.js.org/next/api/hooks#useselector
  */
-const { selectAll, selectEntities } = gameAdapter.getSelectors();
-
 export const getGameState = (rootState: any): GameState =>
   rootState[GAME_FEATURE_KEY];
 
@@ -320,4 +352,8 @@ export const selectTurnCount = createSelector(
 export const selectRolePlaying = createSelector(
   getGameState,
   (state) => state.rolePlaying
+);
+export const selectWinner = createSelector(
+  getGameState,
+  (state) => state.winner
 );

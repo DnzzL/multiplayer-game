@@ -6,6 +6,12 @@ export interface User {
 }
 
 export type Role = 'werewolf' | 'villager' | 'sorcerer' | 'cupidon';
+export const translatedRoles = {
+  werewolf: 'Loup-garou',
+  villager: 'Villageois',
+  sorcerer: 'Sorcier',
+  cupidon: 'Cupidon',
+};
 
 export interface Player extends User {
   role: Role;
@@ -36,16 +42,16 @@ export enum GameEvent {
   ReceiveTurnEnd = 'receive_turn_end',
   SendPlayerKilled = 'send_player_killed',
   ReceivePlayerKilled = 'receive_player_killed',
+  SendPlayerRevived = 'send_player_revived',
+  ReceivePlayerRevived = 'receive_player_revived',
   SendPlayerBound = 'send_player_bound',
   ReceivePlayerBound = 'receive_player_bound',
+  ReceiveGameEnd = 'receive_game_end',
 }
 
 export const firstRoleOrder: Role[] = ['cupidon', 'werewolf', 'sorcerer'];
 export const roleOrder: Role[] = ['werewolf', 'sorcerer'];
-export const characterActions = {
-  cupidon: ['bind'],
-  werewolf: ['kill'],
-  sorcerer: ['kill', 'save', 'pass'],
-};
+
+export type SorcererAction = 'kill' | 'revive' | 'pass';
 
 export const actions = ['bind', 'kill', 'save', 'pass'];

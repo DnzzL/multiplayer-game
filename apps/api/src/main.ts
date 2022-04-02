@@ -30,6 +30,7 @@ let gameConfig: GameConfig;
 let turnCount = 0;
 let currentTurnOrder = 0;
 let currentTurnKilled = [];
+let currentTurnRevived = [];
 
 function handleUser(socket, userName) {
   console.log('%s has connected', userName);
@@ -87,30 +88,55 @@ function handleTurnStart() {
   io.sockets.emit(GameEvent.ReceiveTurnStart);
 }
 
+function endTurn() {
+  const killCounts = {};
+  for (const num of currentTurnKilled) {
+    killCounts[num] = killCounts[num] ? killCounts[num] + 1 : 1;
+  }
+  const reviveCounts = {};
+  for (const num of currentTurnRevived) {
+    reviveCounts[num] = reviveCounts[num] ? reviveCounts[num] + 1 : 1;
+  }
+  currentTurnKilled
+    .filter(
+      (userName) =>
+        !currentTurnRevived.includes(userName) ||
+        reviveCounts[userName] < killCounts[userName]
+    )
+    .forEach((userName) => {
+      io.sockets.emit(GameEvent.ReceivePlayerKilled, userName);
+    });
+  if (!werewolfAlive()) {
+    io.sockets.emit(GameEvent.ReceiveGameEnd, 'villager');
+  } else if (!villagerAlive()) {
+    io.sockets.emit(GameEvent.ReceiveGameEnd, 'werewolf');
+  } else {
+    currentTurnOrder = 0;
+    currentTurnKilled = [];
+    currentTurnRevived = [];
+    io.sockets.emit(GameEvent.ReceiveTurnEnd);
+  }
+}
+
 function handleSendRolePlaying(
   io: Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, unknown>
 ) {
-  const assignedRoles = Object.keys(gameConfig).filter(
-    (k) => Object(gameConfig)[k] > 0
+  const assignedPlayingRoles = Object.keys(gameConfig).filter(
+    (k) => k !== 'villager' && Object(gameConfig)[k] > 0
   );
-  if (currentTurnOrder <= assignRoles.length) {
+  if (currentTurnOrder <= assignedPlayingRoles.length - 1) {
     const rolePlaying =
       turnCount === 1
-        ? firstRoleOrder.filter((role) => assignedRoles.includes(role))[
+        ? firstRoleOrder.filter((role) => assignedPlayingRoles.includes(role))[
             currentTurnOrder
           ]
-        : roleOrder.filter((role) => assignedRoles.includes(role))[
+        : roleOrder.filter((role) => assignedPlayingRoles.includes(role))[
             currentTurnOrder
           ];
     io.sockets.emit(GameEvent.ReceiveRolePlaying, rolePlaying);
     currentTurnOrder = currentTurnOrder + 1;
   } else {
-    currentTurnOrder = 0;
-    io.sockets.emit(GameEvent.ReceiveTurnEnd);
-    currentTurnKilled.forEach((userName) => {
-      io.sockets.emit(GameEvent.ReceivePlayerKilled, userName);
-    });
-    currentTurnKilled = [];
+    endTurn();
   }
 }
 
@@ -158,6 +184,33 @@ function handlePlayerKilled(userName: string): void {
     : players;
 }
 
+function handlePlayerRevived(userName: string): void {
+  currentTurnRevived.push(userName);
+  const player = players.find((player) => player.userName === userName);
+  const index = players.findIndex((player) => player.userName === userName);
+  players = players
+    ? [
+        ...players.slice(0, index),
+        { ...player, isAlive: true },
+        ...players.slice(index + 1),
+      ]
+    : players;
+}
+
+function werewolfAlive(): boolean {
+  return (
+    players.filter((player) => player.role === 'werewolf' && player.isAlive)
+      .length > 0
+  );
+}
+
+function villagerAlive(): boolean {
+  return (
+    players.filter((player) => player.role === 'villager' && player.isAlive)
+      .length > 0
+  );
+}
+
 io.on('connection', (socket) => {
   socket.on(GameEvent.SendUser, (userName: string) =>
     handleUser(socket, userName)
@@ -182,6 +235,9 @@ io.on('connection', (socket) => {
   );
   socket.on(GameEvent.SendPlayerKilled, (userName: string) =>
     handlePlayerKilled(userName)
+  );
+  socket.on(GameEvent.SendPlayerRevived, (userName: string) =>
+    handlePlayerRevived(userName)
   );
 });
 

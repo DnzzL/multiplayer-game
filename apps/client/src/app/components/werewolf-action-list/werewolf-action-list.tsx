@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { gameActions, selectUsers } from '../../store/game.slice';
+import { useDispatch } from 'react-redux';
+import { gameActions } from '../../store/game.slice';
 
 /* eslint-disable-next-line */
 export interface WerewolfActionListProps {
@@ -10,7 +10,6 @@ export interface WerewolfActionListProps {
 
 function WerewolfActionList(props: WerewolfActionListProps) {
   const dispatch = useDispatch();
-  const users = useSelector(selectUsers);
   const [selectedPlayer, setSelectedPlayer] = useState<string>('');
 
   const handleChange = (e: React.ChangeEvent<HTMLFormElement>) => {
@@ -26,14 +25,11 @@ function WerewolfActionList(props: WerewolfActionListProps) {
     <form onChange={handleChange} onSubmit={handleSubmit}>
       {props.items.map((item) => (
         <label htmlFor={item}>
-          <input id={item} type="checkbox" name="target" /> {item}
+          <input id={item} type="radio" name="target" /> {item}
         </label>
       ))}
-      <button
-        type="submit"
-        disabled={!users.map((user) => user.userName).includes(selectedPlayer)}
-      >
-        Submit
+      <button type="submit" disabled={selectedPlayer.length !== 1}>
+        Finish
       </button>
     </form>
   );
