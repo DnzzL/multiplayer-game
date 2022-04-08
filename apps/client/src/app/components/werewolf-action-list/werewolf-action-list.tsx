@@ -28,7 +28,7 @@ function WerewolfActionList(props: WerewolfActionListProps) {
           <input id={item} type="radio" name="target" /> {item}
         </label>
       ))}
-      <button type="submit" disabled={selectedPlayer.length !== 1}>
+      <button type="submit" disabled={selectedPlayer.length === 1}>
         Finish
       </button>
     </form>

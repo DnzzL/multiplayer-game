@@ -1,7 +1,7 @@
 import { SorcererAction } from '@loup-garou/types';
 import { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { gameActions, selectUsers } from '../../store/game.slice';
+import { useDispatch } from 'react-redux';
+import { gameActions } from '../../store/game.slice';
 
 export interface SorcererActionListProps {
   players: string[];
@@ -61,8 +61,8 @@ function SorcererActionList(props: SorcererActionListProps) {
         type="submit"
         disabled={
           selectedAction !== 'pass'
-            ? selectedPlayer.length !== 1
-            : selectedPlayer.length !== 0
+            ? selectedPlayer.length !== 0
+            : selectedPlayer.length !== 1
         }
       >
         Finish
