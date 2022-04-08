@@ -2,13 +2,12 @@ import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { gameActions } from '../../store/game.slice';
 
-/* eslint-disable-next-line */
-export interface WerewolfActionListProps {
+export interface KillerActionListProps {
   items: string[];
   handleDone: () => void;
 }
 
-function WerewolfActionList(props: WerewolfActionListProps) {
+function KillerActionList(props: KillerActionListProps) {
   const dispatch = useDispatch();
   const [selectedPlayer, setSelectedPlayer] = useState<string>('');
 
@@ -28,11 +27,11 @@ function WerewolfActionList(props: WerewolfActionListProps) {
           <input id={item} type="radio" name="target" /> {item}
         </label>
       ))}
-      <button type="submit" disabled={selectedPlayer.length === 1}>
+      <button type="submit" disabled={selectedPlayer.length !== 1}>
         Finish
       </button>
     </form>
   );
 }
 
-export default WerewolfActionList;
+export default KillerActionList;

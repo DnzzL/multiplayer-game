@@ -5,10 +5,10 @@ import { useNavigate } from 'react-router';
 import CupidonActionList from '../../components/cupidon-action-list/cupidon-action-list';
 import List from '../../components/list/list';
 import SorcererActionList from '../../components/sorcerer-action-list/sorcerer-action-list';
-import WerewolfActionList from '../../components/werewolf-action-list/werewolf-action-list';
+import KillerActionList from '../../components/killer-action-list/killer-action-list';
 import {
   gameActions,
-  selectIsDuringTurn,
+  selectIsDuringNightTurn,
   selectIsGameStarted,
   selectPartners,
   selectRolePlaying,
@@ -30,7 +30,8 @@ export function Game() {
   const selfId = useSelector(selectSelfId);
   const users = useSelector(selectUsers);
   const selfUser = useSelector(selectSelfUser);
-  const isDuringTurn = useSelector(selectIsDuringTurn);
+  const isDuringNightTurn = useSelector(selectIsDuringNightTurn);
+  const isDuringDayTurn = useSelector(selectIsDuringNightTurn);
   const rolePlaying = useSelector(selectRolePlaying);
   const partners = useSelector(selectPartners);
   const winner = useSelector(selectWinner);
@@ -51,7 +52,7 @@ export function Game() {
   }, [isGameStarted, navigate]);
 
   const handleTurnStart = () => {
-    dispatch(gameActions.sendTurnStart());
+    dispatch(gameActions.sendNightTurnStart());
     dispatch(gameActions.requestRolePlaying());
   };
 
@@ -77,13 +78,26 @@ export function Game() {
           </button>
         </>
       ) : null}
-      {roomMaster === selfId && !isDuringTurn && !winner ? (
+      {roomMaster === selfId &&
+      !isDuringNightTurn &&
+      !isDuringDayTurn &&
+      !winner ? (
         <button onClick={handleTurnStart}>Start Turn</button>
       ) : null}
-      {isDuringTurn && selfRole === rolePlaying && <p>A toi de jouer</p>}
-      {isDuringTurn && selfRole === rolePlaying ? (
+      {isDuringNightTurn && selfRole === rolePlaying && selfUser?.isAlive && (
+        <p>A toi de jouer</p>
+      )}
+      {!isDuringNightTurn && isDuringDayTurn && selfRole === rolePlaying ? (
+        <KillerActionList
+          items={users
+            .filter((user) => user.userID !== selfId && user.isAlive)
+            .map((u) => u.userName)}
+          handleDone={handleDone}
+        ></KillerActionList>
+      ) : null}
+      {isDuringNightTurn && selfRole === rolePlaying ? (
         rolePlaying === 'werewolf' ? (
-          <WerewolfActionList
+          <KillerActionList
             items={users
               .filter(
                 (user) =>
@@ -93,7 +107,7 @@ export function Game() {
               )
               .map((u) => u.userName)}
             handleDone={handleDone}
-          ></WerewolfActionList>
+          ></KillerActionList>
         ) : selfRole === rolePlaying && rolePlaying === 'cupidon' ? (
           <CupidonActionList
             items={users.map((user) => user.userName)}

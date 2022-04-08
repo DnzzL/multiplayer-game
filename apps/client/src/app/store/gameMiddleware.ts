@@ -38,7 +38,7 @@ const gameMiddleware: Middleware = (store) => {
         store.dispatch(gameActions.receivePartners({ partners }));
       });
 
-      socket.on(GameEvent.ReceiveTurnStart, () => {
+      socket.on(GameEvent.ReceiveNightTurnStart, () => {
         textToSpeech('La nuit tombe sur le village ... Fermez vos yeux');
         store.dispatch(gameActions.switchIsDuringTurn());
         store.dispatch(gameActions.incrementTurnCount());
@@ -49,7 +49,11 @@ const gameMiddleware: Middleware = (store) => {
         textToSpeech(`Les ${translatedRoles[rolePlaying]} à vous de jouer`);
       });
 
-      socket.on(GameEvent.ReceiveTurnEnd, () => {
+      socket.on(GameEvent.ReceiveNightTurnEnd, () => {
+        store.dispatch(gameActions.switchIsDuringTurn());
+      });
+
+      socket.on(GameEvent.ReceiveDayTurnStart, () => {
         store.dispatch(gameActions.switchIsDuringTurn());
       });
 
@@ -98,8 +102,8 @@ const gameMiddleware: Middleware = (store) => {
       if (gameActions.requestPartners.match(action)) {
         socket.emit(GameEvent.RequestPartners, action.payload.selfRole);
       }
-      if (gameActions.sendTurnStart.match(action)) {
-        socket.emit(GameEvent.SendTurnStart);
+      if (gameActions.sendNightTurnStart.match(action)) {
+        socket.emit(GameEvent.SendNightTurnStart);
       }
       if (gameActions.requestRolePlaying.match(action)) {
         socket.emit(GameEvent.RequestRolePlaying);

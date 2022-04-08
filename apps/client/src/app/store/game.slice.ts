@@ -26,7 +26,8 @@ export interface GameState extends EntityState<GameEntity> {
   selfRole: Role;
   partners: string[];
   isGameStarted: boolean;
-  isDuringTurn: boolean;
+  isDuringNightTurn: boolean;
+  isDuringDayTurn: boolean;
   turnCount: number;
   rolePlaying: Role;
   winner: Role | null;
@@ -44,7 +45,8 @@ export const initialGameState: GameState = gameAdapter.getInitialState({
   selfRole: 'villager',
   partners: [],
   isGameStarted: false,
-  isDuringTurn: false,
+  isDuringNightTurn: false,
+  isDuringDayTurn: false,
   turnCount: 0,
   rolePlaying: 'cupidon',
   winner: null,
@@ -161,11 +163,18 @@ export const gameSlice = createSlice({
     switchIsDuringTurn: (state) => {
       return {
         ...state,
-        isDuringTurn: !state.isDuringTurn,
+        isDuringNightTurn: !state.isDuringNightTurn,
       };
     },
-    sendTurnStart: () => {
+    sendNightTurnStart: () => {
       return;
+    },
+    receiveDayTurnStart: (state) => {
+      return {
+        ...state,
+        isDuringDayTurn: true,
+        isDuringNightTurn: false,
+      };
     },
     incrementTurnCount: (state) => {
       return {
@@ -369,9 +378,13 @@ export const selectPartners = createSelector(
   getGameState,
   (state) => state.partners
 );
-export const selectIsDuringTurn = createSelector(
+export const selectIsDuringNightTurn = createSelector(
   getGameState,
-  (state) => state.isDuringTurn
+  (state) => state.isDuringNightTurn
+);
+export const selectIsDuringDayTurn = createSelector(
+  getGameState,
+  (state) => state.isDuringDayTurn
 );
 export const selectTurnCount = createSelector(
   getGameState,

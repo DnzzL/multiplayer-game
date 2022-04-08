@@ -89,14 +89,19 @@ function handleRoleRequest(
   socket.emit(GameEvent.ReceiveRole, role);
 }
 
-function handleTurnStart() {
+function handleNightTurnStart() {
   currentTurnOrder = 0;
   turnCount++;
   console.log('starting turn', turnCount);
-  io.sockets.emit(GameEvent.ReceiveTurnStart);
+  io.sockets.emit(GameEvent.ReceiveNightTurnStart);
 }
 
-function endTurn() {
+function handleDayTurnStart() {
+  io.sockets.emit(GameEvent.ReceiveRolePlaying, 'villager');
+  io.sockets.emit(GameEvent.ReceiveDayTurnStart);
+}
+
+function assignKills() {
   const killCounts = {};
   for (const num of currentTurnKilled) {
     killCounts[num] = killCounts[num] ? killCounts[num] + 1 : 1;
@@ -127,29 +132,29 @@ function endTurn() {
     currentTurnOrder = 0;
     currentTurnKilled = [];
     currentTurnRevived = [];
-    io.sockets.emit(GameEvent.ReceiveTurnEnd);
   }
 }
 
 function handleSendRolePlaying(
   io: Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, unknown>
 ) {
-  const assignedPlayingRoles = Object.keys(gameConfig).filter(
+  const nightPlayingRoles = Object.keys(gameConfig).filter(
     (k) => k !== 'villager' && Object(gameConfig)[k] > 0
   );
-  if (currentTurnOrder <= assignedPlayingRoles.length - 1) {
+  if (currentTurnOrder <= nightPlayingRoles.length - 1) {
     const rolePlaying =
       turnCount === 1
-        ? firstRoleOrder.filter((role) => assignedPlayingRoles.includes(role))[
+        ? firstRoleOrder.filter((role) => nightPlayingRoles.includes(role))[
             currentTurnOrder
           ]
-        : roleOrder.filter((role) => assignedPlayingRoles.includes(role))[
+        : roleOrder.filter((role) => nightPlayingRoles.includes(role))[
             currentTurnOrder
           ];
     io.sockets.emit(GameEvent.ReceiveRolePlaying, rolePlaying);
     currentTurnOrder = currentTurnOrder + 1;
   } else {
-    endTurn();
+    assignKills();
+    handleDayTurnStart();
   }
 }
 
@@ -242,7 +247,7 @@ io.on('connection', (socket) => {
   socket.on(GameEvent.RequestPartners, (role: Role) =>
     handlePartnerRequest(socket, role)
   );
-  socket.on(GameEvent.SendTurnStart, () => handleTurnStart());
+  socket.on(GameEvent.SendNightTurnStart, () => handleNightTurnStart());
   socket.on(GameEvent.RequestRolePlaying, () => handleSendRolePlaying(io));
   socket.on(GameEvent.SendPlayerBound, ({ userNameA, userNameB }) =>
     handlePlayerBound(io, userNameA, userNameB)
